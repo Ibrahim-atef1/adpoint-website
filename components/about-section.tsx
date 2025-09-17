@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 import { Target, Lightbulb, Users, TrendingUp } from "lucide-react"
-import { FadeUp } from "./fade-up"
+// FadeUp component replaced with motion.div
 
 export function AboutSection() {
   const ref = useRef(null)
@@ -32,7 +32,11 @@ export function AboutSection() {
         <div ref={ref} className="grid lg:grid-cols-2 gap-20 items-center">
           {/* Text Content */}
           <div className="space-y-12">
-            <FadeUp>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
               <div className="space-y-8">
                 <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white text-balance">
                   Digital
@@ -46,9 +50,13 @@ export function AboutSection() {
                   <div className="w-24 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full" />
                 </div>
               </div>
-            </FadeUp>
+            </motion.div>
 
-            <FadeUp delay={0.2}>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            >
               <div className="space-y-6">
                 <p className="text-lg text-gray-300 leading-relaxed">
                   From bold branding initiatives to cutting-edge digital campaigns, we combine creativity with
@@ -66,11 +74,15 @@ export function AboutSection() {
                   ))}
                 </div>
               </div>
-            </FadeUp>
+            </motion.div>
           </div>
 
           {/* Stats Grid */}
-          <FadeUp delay={0.4}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+          >
             <div className="grid grid-cols-2 gap-6">
               {stats.map((stat, index) => (
                 <div
@@ -89,7 +101,7 @@ export function AboutSection() {
                 </div>
               ))}
             </div>
-          </FadeUp>
+          </motion.div>
         </div>
       </div>
     </section>

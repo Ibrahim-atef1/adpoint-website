@@ -1,211 +1,107 @@
 "use client"
 
-import React, { useEffect, useRef, useState, useCallback } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import Image from "next/image"
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-interface Particle {
-  x: number
-  y: number
-  r: number
-  dx: number
-  dy: number
-  alpha: number
-  life: number
-}
-
 interface ProjectCardProps {
-  image: string
   title: string
   category: string
   results: string
   description: string
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
-  image,
-  title,
-  category,
-  results,
-  description,
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationFrameId = useRef<number | null>(null)
-  const particles = useRef<Particle[]>([])
-  const mouse = useRef({ x: 0, y: 0 })
+const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, description }) => {
   const [isHovered, setIsHovered] = useState(false)
 
-  const createParticle = useCallback((x: number, y: number): Particle => {
-    return {
-      x,
-      y,
-      r: Math.random() * 1 + 0.5,
-      dx: (Math.random() - 0.5) * 0.2,
-      dy: (Math.random() - 0.5) * 0.2,
-      alpha: Math.random() * 0.4 + 0.3,
-      life: Math.random() * 60 + 30,
-    }
-  }, [])
-
-  const initParticles = useCallback((canvas: HTMLCanvasElement) => {
-    particles.current = []
-    for (let i = 0; i < 10; i++) {
-      particles.current.push(
-        createParticle(Math.random() * canvas.width, Math.random() * canvas.height)
-      )
-    }
-  }, [createParticle])
-
-  const animateParticles = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    for (let i = 0; i < particles.current.length; i++) {
-      const p = particles.current[i]
-
-      // Apply cursor influence
-      const dxMouse = mouse.current.x - p.x
-      const dyMouse = mouse.current.y - p.y
-      const distance = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse)
-
-      if (distance < 100) {
-        p.dx -= (dxMouse / distance) * 0.005
-        p.dy -= (dyMouse / distance) * 0.005
-      }
-
-      p.x += p.dx
-      p.y += p.dy
-      p.life -= 1
-
-      // Bounce off walls
-      if (p.x < 0 || p.x > canvas.width) p.dx *= -1
-      if (p.y < 0 || p.y > canvas.height) p.dy *= -1
-
-      // Fade out
-      p.alpha = Math.max(0, p.life / 60)
-
-      ctx.beginPath()
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(194,69,51, ${p.alpha * 0.4})`
-      ctx.fill()
-
-      // Remove dead particles and create new ones
-      if (p.life <= 0) {
-        particles.current[i] = createParticle(
-          Math.random() * canvas.width,
-          Math.random() * canvas.height
-        )
-      }
-    }
-
-    animationFrameId.current = requestAnimationFrame(animateParticles)
-  }, [createParticle])
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const handleResize = () => {
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
-      initParticles(canvas)
-    }
-
-    const handleMouseMove = (e: Event) => {
-      const mouseEvent = e as MouseEvent
-      const rect = (canvas as HTMLCanvasElement).getBoundingClientRect()
-      mouse.current = {
-        x: mouseEvent.clientX - rect.left,
-        y: mouseEvent.clientY - rect.top,
-      }
-    }
-
-    window.addEventListener("resize", handleResize)
-    canvas.addEventListener("mousemove", handleMouseMove as EventListener)
-
-    handleResize()
-    animationFrameId.current = requestAnimationFrame(animateParticles)
-
-    return () => {
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current)
-      }
-      window.removeEventListener("resize", handleResize)
-      canvas.removeEventListener("mousemove", handleMouseMove as EventListener)
-    }
-  }, [animateParticles, initParticles])
-
   return (
-    <div
-      className="relative w-[500px] h-[600px] bg-black rounded-3xl overflow-hidden flex-shrink-0
-                 transition-all duration-700 ease-out group cursor-pointer mx-auto"
+    <div 
+      className="relative w-[500px] h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        transform: isHovered 
-          ? `perspective(1000px) rotateX(${Math.sin(Date.now() * 0.001) * 1}deg) rotateY(${Math.cos(Date.now() * 0.001) * 1}deg) scale(1.02)` 
-          : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
         boxShadow: isHovered 
-          ? `0 30px 60px rgba(194,69,51,0.4), 0 0 80px rgba(194,69,51,0.3)` 
-          : '0 15px 30px rgba(0,0,0,0.6)'
+          ? '0 0 30px rgba(185, 28, 28, 0.4), 0 0 60px rgba(185, 28, 28, 0.2), 0 0 90px rgba(185, 28, 28, 0.1)' 
+          : '0 0 15px rgba(185, 28, 28, 0.2), 0 0 30px rgba(185, 28, 28, 0.1)',
+        willChange: 'transform, box-shadow',
+        transform: 'translate3d(0, 0, 0)'
       }}
     >
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        aria-hidden="true"
+      {/* Underglow effect */}
+      <div 
+        className="absolute inset-0 rounded-2xl opacity-0 transition-all duration-1000"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(185, 28, 28, 0.15), transparent 70%)',
+          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+          opacity: isHovered ? 1 : 0
+        }}
       />
-      
-      {/* Project Image */}
-      <div className="relative w-full h-full">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className={`object-cover transition-all duration-700 ease-out ${
-            isHovered ? "grayscale-0 scale-105" : "grayscale scale-100"
-          }`}
-          sizes="600px"
-          priority={false}
-        />
-        
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-        
-        {/* Results badge */}
-        <div className="absolute top-6 right-6 bg-red-600/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold">
-          {results}
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-8 text-center">
+        <div className={`w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mb-6 transition-all duration-1000 relative ${isHovered ? 'scale-110' : 'scale-100'}`} style={{ 
+          boxShadow: `0 0 25px rgba(185, 28, 28, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)`,
+          transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
+        }}>
+          {/* Animated background ring */}
+          <div 
+            className="absolute inset-0 rounded-full opacity-0 transition-all duration-1000"
+            style={{
+              background: 'conic-gradient(from 0deg, rgba(185, 28, 28, 0.4), transparent, rgba(185, 28, 28, 0.2))',
+              transform: isHovered ? 'rotate(360deg)' : 'rotate(0deg)',
+              opacity: isHovered ? 1 : 0
+            }}
+          />
+          
+          {/* Floating particles around letter */}
+          {isHovered && [...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 rounded-full animate-ping"
+              style={{
+                background: '#ef4444',
+                left: `${20 + i * 20}%`,
+                top: `${20 + i * 20}%`,
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: '1.5s'
+              }}
+            />
+          ))}
+          
+          <span 
+            className="text-2xl font-bold text-white transition-all duration-1000 relative z-10"
+            style={{
+              transform: isHovered ? 'scale(1.1) rotate(-5deg)' : 'scale(1) rotate(0deg)',
+              filter: isHovered ? 'drop-shadow(0 0 8px currentColor)' : 'none'
+            }}
+          >
+            {title.charAt(0)}
+          </span>
         </div>
         
-        {/* Content overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-8">
-          <div className="text-red-400 text-sm font-medium mb-3 uppercase tracking-wider">
-            {category}
-          </div>
-          <h3 className="text-4xl font-bold text-white font-display mb-4">
-            {title}
-          </h3>
-          
-          {/* Description that appears on hover */}
-          <div 
-            className={`text-lg text-gray-300 leading-relaxed max-w-lg transition-all duration-500 ${
-              isHovered 
-                ? 'opacity-100 transform translate-y-0' 
-                : 'opacity-0 transform translate-y-4'
-            }`}
-          >
-            {description}
+        <div className="text-red-400 text-sm font-medium mb-2 uppercase tracking-wider">
+          {category}
+        </div>
+        
+        <h3 className="text-2xl font-bold text-white font-display mb-4 float">
+          {title}
+        </h3>
+        
+        <div className="bg-red-600/20 text-red-400 px-4 py-2 rounded-full text-sm font-semibold mb-4 backdrop-blur-sm border border-red-400/20">
+          {results}
+        </div>
+
+        {/* Hover Description */}
+        <div className={`transition-all duration-1000 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <p className="text-gray-300 text-sm leading-relaxed max-w-sm">
+              {description}
+            </p>
           </div>
         </div>
       </div>
@@ -216,116 +112,122 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 export function PortfolioSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkIsMobile()
-    window.addEventListener("resize", checkIsMobile)
-    return () => window.removeEventListener("resize", checkIsMobile)
-  }, [])
+    if (!sectionRef.current || !containerRef.current) return
 
-  useEffect(() => {
-    if (!sectionRef.current || !containerRef.current || isMobile) return
+    const cardWidth = 500 + 40 // card width + gap
+    const viewportWidth = window.innerWidth
+    const totalCards = 6
+    const totalScrollDistance = (totalCards - 1) * cardWidth
 
-    const cards = containerRef.current.querySelectorAll('.card-container')
-    const totalCards = cards.length
-    const cardWidth = window.innerWidth
+    // Create progress bar
+    const progressBar = document.createElement('div')
+    progressBar.className = 'fixed top-0 left-0 w-full h-1 bg-gray-800 z-50'
+    progressBar.innerHTML = '<div class="h-full bg-red-600 transition-all duration-300 ease-out" style="width: 0%"></div>'
+    document.body.appendChild(progressBar)
 
     const ctx = gsap.context(() => {
+      // Center the first card by offsetting the container
+      const centerOffset = (viewportWidth - cardWidth) / 2
+      gsap.set(containerRef.current, { x: centerOffset })
+
+      // Calculate scroll distance to show all cards
+      const scrollDistance = totalScrollDistance
+
       gsap.to(containerRef.current, {
-        x: -(cardWidth * (totalCards - 1)),
+        x: centerOffset - scrollDistance,
         ease: "none",
         scrollTrigger: {
           trigger: sectionRef.current,
           pin: true,
           scrub: 1,
-          start: "top center",
-          end: () => `+=${cardWidth * totalCards}`,
-          invalidateOnRefresh: true,
+          start: "top top",
+          end: () => `+=${scrollDistance}`,
+          onUpdate: (self) => {
+            const progress = (self.progress * 100).toFixed(1)
+            const progressFill = progressBar.querySelector('div') as HTMLElement
+            if (progressFill) {
+              progressFill.style.width = `${progress}%`
+            }
+          }
         },
       })
     }, sectionRef)
 
-    return () => ctx.revert()
-  }, [isMobile])
+    return () => {
+      ctx.revert()
+      if (progressBar.parentNode) {
+        progressBar.parentNode.removeChild(progressBar)
+      }
+    }
+  }, [])
 
   const projects = [
-    {
-      image: "/architecture-firm-logo-with-building-silhouette.jpg",
-      title: "Architecture Firm",
-      category: "Brand Identity",
+    { 
+      title: "Architecture Firm", 
+      category: "Brand Identity", 
       results: "40% Growth",
-      description: "A comprehensive brand identity system for a modern architecture firm, featuring clean typography, sophisticated color palette, and memorable logo design that reflects their innovative approach to sustainable building design."
+      description: "Complete brand identity redesign for a modern architecture firm. Created a sophisticated visual system that elevated their market presence and increased client inquiries by 40%."
     },
-    {
-      image: "/coffee-shop-branding-with-warm-colors-and-artisan-.jpg",
-      title: "Coffee Shop Brand",
-      category: "Visual Design",
+    { 
+      title: "Coffee Shop Brand", 
+      category: "Visual Design", 
       results: "25% Sales Up",
-      description: "Warm and inviting brand identity for an artisanal coffee shop, incorporating hand-drawn elements, earthy tones, and authentic storytelling that resonates with coffee enthusiasts and local community members."
+      description: "Warm, artisanal branding for a local coffee shop. Developed a cohesive visual identity that captured the cozy, authentic atmosphere and boosted sales by 25%."
     },
-    {
-      image: "/digital-agency-logo-with-modern-geometric-design.jpg",
-      title: "Digital Agency",
-      category: "Web Design",
+    { 
+      title: "Digital Agency", 
+      category: "Web Design", 
       results: "60% Leads",
-      description: "Modern, geometric brand identity for a cutting-edge digital agency, featuring bold typography, dynamic layouts, and a tech-forward aesthetic that positions them as industry leaders in digital innovation."
+      description: "Modern, conversion-focused website design for a digital marketing agency. Implemented strategic UX improvements that increased lead generation by 60%."
     },
-    {
-      image: "/eco-friendly-brand-logo-with-green-leaf-element.jpg",
-      title: "Eco Brand",
-      category: "Brand Strategy",
+    { 
+      title: "Eco Brand", 
+      category: "Brand Strategy", 
       results: "35% Engagement",
-      description: "Sustainable brand identity for an eco-friendly company, emphasizing environmental consciousness through organic shapes, green color schemes, and messaging that connects with environmentally conscious consumers."
+      description: "Sustainable brand strategy for an eco-friendly marketplace. Developed messaging and visual identity that resonated with environmentally conscious consumers, increasing engagement by 35%."
     },
-    {
-      image: "/financial-services-logo-with-professional-design.jpg",
-      title: "Financial Services",
-      category: "Corporate Design",
+    { 
+      title: "Financial Services", 
+      category: "Corporate Design", 
       results: "50% Trust Score",
-      description: "Professional and trustworthy brand identity for a financial services firm, featuring clean lines, conservative color palette, and design elements that convey stability, reliability, and expertise in financial matters."
+      description: "Professional corporate identity for a financial services company. Created a trustworthy, authoritative brand presence that improved customer confidence and trust scores by 50%."
     },
-    {
-      image: "/tech-company-logo-with-modern-typography.jpg",
-      title: "Tech Startup",
-      category: "UI/UX Design",
+    { 
+      title: "Tech Startup", 
+      category: "UI/UX Design", 
       results: "80% User Growth",
-      description: "Innovative brand identity for a tech startup, combining modern typography, vibrant colors, and futuristic design elements that capture the company's forward-thinking approach and technological expertise."
+      description: "Intuitive mobile app design for a tech startup. Focused on user experience and accessibility, resulting in 80% user growth and high user retention rates."
     },
   ]
 
   return (
-    <section
-      ref={sectionRef}
-      id="portfolio"
-      className="relative w-full min-h-screen py-20 bg-black"
-    >
-      {/* Section Headline - Separate from scrollable content */}
-      <div className="relative z-20 px-8">
-        <h2 className="text-5xl font-bold text-white text-center mb-20 font-display">
+    <section ref={sectionRef} className="relative w-full h-screen bg-black">
+      {/* Header */}
+      <div className="absolute top-8 left-0 right-0 z-20">
+        <h2 className="text-4xl font-bold text-white text-center font-display">
           Our Work
         </h2>
       </div>
 
-      {/* Horizontal Scroll Container */}
-      {isMobile ? (
-        <div className="flex flex-col items-center space-y-16 px-8">
+      {/* Cards Container */}
+      <div className="relative h-full flex items-center overflow-hidden">
+        <div 
+          ref={containerRef} 
+          className="flex flex-nowrap items-center"
+          style={{ 
+            width: 'max-content',
+            transform: 'translate3d(0, 0, 0)'
+          }}
+        >
           {projects.map((project, i) => (
-            <ProjectCard key={i} {...project} />
-          ))}
-        </div>
-      ) : (
-        <div ref={containerRef} className="flex flex-nowrap items-center justify-center">
-          {projects.map((project, i) => (
-            <div key={i} className="card-container flex items-center justify-center w-screen h-screen min-h-screen">
+            <div key={i} className="px-5">
               <ProjectCard {...project} />
-                    </div>
+            </div>
           ))}
         </div>
-      )}
+      </div>
     </section>
   )
 }

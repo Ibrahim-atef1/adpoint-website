@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
+import { useForm } from "@/contexts/FormContext"
 
 interface CalendarPickerProps {
   selectedDate: string
@@ -24,12 +25,14 @@ export function CalendarPicker({
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [view, setView] = useState<"month" | "year">("month")
   const calendarRef = useRef<HTMLDivElement>(null)
+  const { setIsCalendarOpen } = useForm()
 
   // Close calendar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
         onClose()
+        setIsCalendarOpen(false)
       }
     }
 
@@ -38,7 +41,12 @@ export function CalendarPicker({
     }
 
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, setIsCalendarOpen])
+
+  // Update calendar state when opening/closing
+  useEffect(() => {
+    setIsCalendarOpen(isOpen)
+  }, [isOpen, setIsCalendarOpen])
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()

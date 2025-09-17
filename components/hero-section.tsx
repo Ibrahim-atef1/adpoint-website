@@ -4,11 +4,13 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRef, useEffect, useState } from "react"
+import { useForm } from "@/contexts/FormContext"
 
 export function HeroSection() {
   const ref = useRef(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hasScrolled, setHasScrolled] = useState(false)
+  const { setIsNavigating } = useForm()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -45,7 +47,11 @@ export function HeroSection() {
   }, [])
 
   const scrollToAbout = () => {
+    setIsNavigating(true)
     document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
+    setTimeout(() => {
+      setIsNavigating(false)
+    }, 1000)
   }
 
   return (
@@ -169,7 +175,13 @@ export function HeroSection() {
               className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow"
               onClick={() => {
                 window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                // Temporarily disable footer to prevent triggering during scroll
+                setIsNavigating(true)
                 document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+                // Re-enable footer after scroll completes
+                setTimeout(() => {
+                  setIsNavigating(false)
+                }, 1000)
               }}
             >
               Start Your Project

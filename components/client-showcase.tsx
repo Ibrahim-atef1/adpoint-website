@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
-import { FadeUp } from "./fade-up"
+// FadeUp component replaced with motion.div
 
 const clients = [
   { name: "TechFlow", logo: "TF", category: "Technology" },
@@ -33,7 +33,11 @@ export function ClientShowcase() {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <FadeUp>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <div className="text-center mb-16">
             <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-8 text-balance">
               Trusted by
@@ -52,7 +56,7 @@ export function ClientShowcase() {
               <div className="w-32 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto" />
             </div>
           </div>
-        </FadeUp>
+        </motion.div>
 
         {/* Client Logos Carousel */}
         <div ref={ref} className="relative overflow-hidden">
@@ -113,7 +117,11 @@ export function ClientShowcase() {
         </div>
 
         {/* Stats Section */}
-        <FadeUp delay={0.3}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+        >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20">
             {[
               { number: "500+", label: "Projects Delivered" },
@@ -139,7 +147,7 @@ export function ClientShowcase() {
               </motion.div>
             ))}
           </div>
-        </FadeUp>
+        </motion.div>
       </div>
     </section>
   )

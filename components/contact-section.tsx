@@ -8,11 +8,13 @@ import { useRef, useState } from "react"
 import { Mail, Phone, MapPin, X, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SchedulingForm } from "@/components/scheduling-form"
+import { useForm } from "@/contexts/FormContext"
 
 export function ContactSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isSchedulingOpen, setIsSchedulingOpen] = useState(false)
+  const { setIsFormOpen } = useForm()
 
 
   const contactInfo = [
@@ -74,6 +76,7 @@ export function ContactSection() {
                 onClick={() => {
                   window.dispatchEvent(new Event("adpoint:bypass-hijack"))
                   setIsSchedulingOpen(true)
+                  setIsFormOpen(true)
                 }}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 text-xl px-12 py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow flex items-center gap-3"
               >
@@ -114,7 +117,10 @@ export function ContactSection() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setIsSchedulingOpen(false)}
+            onClick={() => {
+              setIsSchedulingOpen(false)
+              setIsFormOpen(false)
+            }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -128,7 +134,10 @@ export function ContactSection() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsSchedulingOpen(false)}
+                  onClick={() => {
+                    setIsSchedulingOpen(false)
+                    setIsFormOpen(false)
+                  }}
                   className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 bg-black/50 hover:bg-black/70 rounded-full p-2"
                 >
                   <X className="w-5 h-5" />

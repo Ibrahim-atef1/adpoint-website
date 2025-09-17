@@ -1,5 +1,6 @@
 import dynamicImport from "next/dynamic"
 import NoSSR from "@/components/no-ssr"
+import { FormProvider } from "@/contexts/FormContext"
 
 
 // Optimized dynamic imports with better loading strategies
@@ -32,7 +33,7 @@ const ClientShowcase = dynamicImport(() => import("@/components/client-showcase"
 const ContactSection = dynamicImport(() => import("@/components/contact-section").then(m => m.ContactSection), {
   loading: () => <div className="min-h-screen bg-background" />
 })
-const Footer = dynamicImport(() => import("@/components/footer").then(m => m.Footer), {
+const WorkingCinematicFooter = dynamicImport(() => import("@/components/working-cinematic-footer").then(m => m.WorkingCinematicFooter), {
   loading: () => <div className="h-32 bg-black" />
 })
 const ParallaxSection = dynamicImport(() => import("@/components/parallax-section").then(m => m.ParallaxSection), {
@@ -42,38 +43,40 @@ const ParallaxSection = dynamicImport(() => import("@/components/parallax-sectio
 export default function HomePage() {
   return (
     <NoSSR>
-      <main className="min-h-screen bg-background text-foreground">
-        <Navigation />
-        <ScrollProgress />
+      <FormProvider>
+        <main className="min-h-screen bg-background text-foreground">
+          <Navigation />
+          <ScrollProgress />
 
-        <div id="hero">
-          <HeroSection />
-        </div>
+          <div id="hero">
+            <HeroSection />
+          </div>
 
-        <div id="about">
-          <ParallaxSection offset={30}>
-            <AboutSection />
-          </ParallaxSection>
-        </div>
+          <div id="about">
+            <ParallaxSection offset={30}>
+              <AboutSection />
+            </ParallaxSection>
+          </div>
 
-        <div id="services">
-          <ServicesCarousel />
-        </div>
+          <div id="services">
+            <ServicesCarousel />
+          </div>
 
-        <div id="portfolio">
-          <PortfolioSection />
-        </div>
+          <div id="portfolio">
+            <PortfolioSection />
+          </div>
 
-        <ClientShowcase />
+          <ClientShowcase />
 
-        <div id="contact">
-          <ParallaxSection offset={20}>
-            <ContactSection />
-          </ParallaxSection>
-        </div>
+          <div id="contact">
+            <ParallaxSection offset={20}>
+              <ContactSection />
+            </ParallaxSection>
+          </div>
 
-        <Footer />
-      </main>
+          <WorkingCinematicFooter />
+        </main>
+      </FormProvider>
     </NoSSR>
   )
 }

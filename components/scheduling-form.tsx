@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Calendar, Clock, ChevronDown, Check, X } from "lucide-react"
 import { CalendarPicker } from "@/components/calendar-picker"
+import { useForm } from "@/contexts/FormContext"
 import emailjs from "@emailjs/browser"
 
 interface FormData {
@@ -52,6 +53,7 @@ export function SchedulingForm() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [submitMessage, setSubmitMessage] = useState("")
   const [isError, setIsError] = useState(false)
+  const { setIsCalendarOpen } = useForm()
 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const datePickerRef = useRef<HTMLDivElement>(null)
@@ -65,6 +67,7 @@ export function SchedulingForm() {
       }
       if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
         setIsDatePickerOpen(false)
+        setIsCalendarOpen(false)
       }
       if (timePickerRef.current && !timePickerRef.current.contains(event.target as Node)) {
         setIsTimePickerOpen(false)
@@ -73,7 +76,23 @@ export function SchedulingForm() {
 
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [setIsCalendarOpen])
+
+  // Auto-scroll when calendar opens
+  useEffect(() => {
+    if (isDatePickerOpen) {
+      setIsCalendarOpen(true)
+      // Scroll to the calendar picker
+      setTimeout(() => {
+        datePickerRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "center" 
+        })
+      }, 100)
+    } else {
+      setIsCalendarOpen(false)
+    }
+  }, [isDatePickerOpen, setIsCalendarOpen])
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))

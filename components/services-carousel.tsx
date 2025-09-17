@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useState, useCallback } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Palette, Globe, Megaphone, BarChart3, Camera, Code } from "lucide-react"
@@ -8,16 +8,6 @@ import { Palette, Globe, Megaphone, BarChart3, Camera, Code } from "lucide-react
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger)
-}
-
-interface Particle {
-  x: number
-  y: number
-  r: number
-  dx: number
-  dy: number
-  alpha: number
-  life: number
 }
 
 interface ServiceCardProps {
@@ -28,169 +18,87 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationFrameId = useRef<number | null>(null)
-  const particles = useRef<Particle[]>([])
-  const mouse = useRef({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
 
-  const createParticle = useCallback((x: number, y: number): Particle => {
-    return {
-      x,
-      y,
-      r: Math.random() * 1 + 0.5,
-      dx: (Math.random() - 0.5) * 0.2,
-      dy: (Math.random() - 0.5) * 0.2,
-      alpha: Math.random() * 0.4 + 0.3,
-      life: Math.random() * 60 + 30,
-    }
-  }, [])
-
-  const initParticles = useCallback((canvas: HTMLCanvasElement) => {
-    particles.current = []
-    for (let i = 0; i < 10; i++) {
-      particles.current.push(
-        createParticle(Math.random() * canvas.width, Math.random() * canvas.height)
-      )
-    }
-  }, [createParticle])
-
-  const animateParticles = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    for (let i = 0; i < particles.current.length; i++) {
-      const p = particles.current[i]
-
-      // Apply cursor influence
-      const dxMouse = mouse.current.x - p.x
-      const dyMouse = mouse.current.y - p.y
-      const distance = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse)
-
-      if (distance < 100) {
-        p.dx -= (dxMouse / distance) * 0.005
-        p.dy -= (dyMouse / distance) * 0.005
-      }
-
-      p.x += p.dx
-      p.y += p.dy
-      p.life -= 1
-
-      // Bounce off walls
-      if (p.x < 0 || p.x > canvas.width) p.dx *= -1
-      if (p.y < 0 || p.y > canvas.height) p.dy *= -1
-
-      // Fade out
-      p.alpha = Math.max(0, p.life / 60)
-
-      ctx.beginPath()
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(194,69,51, ${p.alpha * 0.4})`
-      ctx.fill()
-
-      // Remove dead particles and create new ones
-      if (p.life <= 0) {
-        particles.current[i] = createParticle(
-          Math.random() * canvas.width,
-          Math.random() * canvas.height
-        )
-      }
-    }
-
-    animationFrameId.current = requestAnimationFrame(animateParticles)
-  }, [createParticle])
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const handleResize = () => {
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
-      initParticles(canvas)
-    }
-
-    const handleMouseMove = (e: Event) => {
-      const mouseEvent = e as MouseEvent
-      const rect = (canvas as HTMLCanvasElement).getBoundingClientRect()
-      mouse.current = {
-        x: mouseEvent.clientX - rect.left,
-        y: mouseEvent.clientY - rect.top,
-      }
-    }
-
-    window.addEventListener("resize", handleResize)
-    canvas.addEventListener("mousemove", handleMouseMove as EventListener)
-
-    handleResize()
-    animationFrameId.current = requestAnimationFrame(animateParticles)
-
-    return () => {
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current)
-      }
-      window.removeEventListener("resize", handleResize)
-      canvas.removeEventListener("mousemove", handleMouseMove as EventListener)
-    }
-  }, [animateParticles, initParticles])
-
   return (
-    <div
-      className="relative w-[500px] h-[600px] bg-black rounded-3xl overflow-hidden flex-shrink-0
-                 transition-all duration-700 ease-out group cursor-pointer mx-auto"
+    <div 
+      className="relative w-[500px] h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        transform: isHovered 
-          ? `perspective(1000px) rotateX(${Math.sin(Date.now() * 0.001) * 1}deg) rotateY(${Math.cos(Date.now() * 0.001) * 1}deg) scale(1.02)` 
-          : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
         boxShadow: isHovered 
-          ? `0 30px 60px rgba(194,69,51,0.4), 0 0 80px rgba(194,69,51,0.3)` 
-          : '0 15px 30px rgba(0,0,0,0.6)'
+          ? `0 0 30px ${color}40, 0 0 60px ${color}20, 0 0 90px ${color}10` 
+          : `0 0 15px ${color}20, 0 0 30px ${color}10`,
+        willChange: 'transform, box-shadow',
+        transform: 'translate3d(0, 0, 0)'
       }}
     >
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        aria-hidden="true"
+      {/* Underglow effect */}
+      <div 
+        className="absolute inset-0 rounded-2xl opacity-0 transition-all duration-1000"
+        style={{
+          background: `radial-gradient(circle at center, ${color}15, transparent 70%)`,
+          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+          opacity: isHovered ? 1 : 0
+        }}
       />
-      
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-transparent to-black/50" />
-      
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full p-12">
+
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-8 text-center">
         <div 
-          className="w-32 h-32 rounded-full flex items-center justify-center mb-8 transition-all duration-700"
+          className="w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all duration-1000 relative"
           style={{
-            background: `linear-gradient(135deg, ${color}20, ${color}40)`,
-            transform: isHovered ? 'scale(1.15) rotate(8deg)' : 'scale(1) rotate(0deg)',
-            boxShadow: isHovered ? `0 0 40px ${color}60` : 'none'
+            background: `linear-gradient(135deg, ${color}30, ${color}50)`,
+            boxShadow: `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
+            transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}
         >
-          <div className="text-6xl" style={{ color }}>
+          {/* Animated background ring */}
+          <div 
+            className="absolute inset-0 rounded-full opacity-0 transition-all duration-1000"
+            style={{
+              background: `conic-gradient(from 0deg, ${color}40, transparent, ${color}20)`,
+              transform: isHovered ? 'rotate(360deg)' : 'rotate(0deg)',
+              opacity: isHovered ? 1 : 0
+            }}
+          />
+          
+          {/* Floating particles around icon */}
+          {isHovered && [...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 rounded-full animate-ping"
+              style={{
+                background: color,
+                left: `${20 + i * 20}%`,
+                top: `${20 + i * 20}%`,
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: '1.5s'
+              }}
+            />
+          ))}
+          
+          <div 
+            className="text-2xl transition-all duration-1000 relative z-10" 
+            style={{ 
+              transform: isHovered ? 'scale(1.1) rotate(-5deg)' : 'scale(1) rotate(0deg)',
+              filter: isHovered ? 'drop-shadow(0 0 8px currentColor)' : 'none'
+            }}
+          >
             {icon}
           </div>
         </div>
         
-        <h3 className="text-4xl font-bold text-white text-center font-display mb-4">
+        <h3 className="text-2xl font-bold text-white font-display mb-4 float">
           {title}
         </h3>
-        
-        {/* Description that appears on hover */}
-        <div 
-          className={`text-lg text-gray-300 text-center leading-relaxed max-w-md transition-all duration-500 ${
-            isHovered 
-              ? 'opacity-100 transform translate-y-0' 
-              : 'opacity-0 transform translate-y-4'
-          }`}
-        >
-          {description}
+
+        {/* Hover Description */}
+        <div className={`transition-all duration-1000 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <p className="text-gray-300 text-sm leading-relaxed max-w-sm">
+              {description}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -200,110 +108,122 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
 export function ServicesCarousel() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkIsMobile()
-    window.addEventListener("resize", checkIsMobile)
-    return () => window.removeEventListener("resize", checkIsMobile)
-  }, [])
+    if (!sectionRef.current || !containerRef.current) return
 
-  useEffect(() => {
-    if (!sectionRef.current || !containerRef.current || isMobile) return
+    const cardWidth = 500 + 40 // card width + gap
+    const viewportWidth = window.innerWidth
+    const totalCards = 6
+    const totalScrollDistance = (totalCards - 1) * cardWidth
 
-    const cards = containerRef.current.querySelectorAll('.card-container')
-    const totalCards = cards.length
-    const cardWidth = window.innerWidth
+    // Create progress bar
+    const progressBar = document.createElement('div')
+    progressBar.className = 'fixed top-0 left-0 w-full h-1 bg-gray-800 z-50'
+    progressBar.innerHTML = '<div class="h-full bg-red-600 transition-all duration-300 ease-out" style="width: 0%"></div>'
+    document.body.appendChild(progressBar)
 
     const ctx = gsap.context(() => {
+      // Center the first card by offsetting the container
+      const centerOffset = (viewportWidth - cardWidth) / 2
+      gsap.set(containerRef.current, { x: centerOffset })
+
+      // Calculate scroll distance to show all cards
+      const scrollDistance = totalScrollDistance
+
       gsap.to(containerRef.current, {
-        x: -(cardWidth * (totalCards - 1)),
+        x: centerOffset - scrollDistance,
         ease: "none",
         scrollTrigger: {
           trigger: sectionRef.current,
           pin: true,
           scrub: 1,
-          start: "top center",
-          end: () => `+=${cardWidth * totalCards}`,
-          invalidateOnRefresh: true,
+          start: "top top",
+          end: () => `+=${scrollDistance}`,
+          onUpdate: (self) => {
+            const progress = (self.progress * 100).toFixed(1)
+            const progressFill = progressBar.querySelector('div') as HTMLElement
+            if (progressFill) {
+              progressFill.style.width = `${progress}%`
+            }
+          }
         },
       })
     }, sectionRef)
 
-    return () => ctx.revert()
-  }, [isMobile])
+    return () => {
+      ctx.revert()
+      if (progressBar.parentNode) {
+        progressBar.parentNode.removeChild(progressBar)
+      }
+    }
+  }, [])
 
   const services = [
-    {
-      title: "Brand Identity",
-      icon: <Palette className="w-16 h-16" />,
+    { 
+      title: "Brand Identity", 
+      icon: <Palette className="w-8 h-8 text-red-500" />, 
       color: "#ef4444",
-      description: "Complete brand development from logo design to comprehensive brand guidelines that make your business unforgettable and distinctive in the market."
+      description: "Create memorable brand identities that resonate with your audience. From logos to complete brand guidelines, we craft visual stories that make your business unforgettable."
     },
-    {
-      title: "Web Development",
-      icon: <Globe className="w-16 h-16" />,
-      color: "#3b82f6",
-      description: "Custom websites and web applications built with cutting-edge technology for optimal performance, user experience, and business growth."
+    { 
+      title: "Web Development", 
+      icon: <Globe className="w-8 h-8 text-red-500" />, 
+      color: "#ef4444",
+      description: "Build fast, responsive websites that convert visitors into customers. Modern web technologies, mobile-first design, and seamless user experiences."
     },
-    {
-      title: "Digital Marketing",
-      icon: <Megaphone className="w-16 h-16" />,
-      color: "#10b981",
-      description: "Data-driven marketing campaigns across all digital channels to maximize your reach, engagement, and conversion rates effectively."
+    { 
+      title: "Digital Marketing", 
+      icon: <Megaphone className="w-8 h-8 text-red-500" />, 
+      color: "#ef4444",
+      description: "Grow your business with strategic digital marketing campaigns. Social media, content marketing, and paid advertising that delivers real results."
     },
-    {
-      title: "SEO & Analytics",
-      icon: <BarChart3 className="w-16 h-16" />,
-      color: "#f59e0b",
-      description: "Boost your online visibility and make informed decisions with our expert SEO strategies and comprehensive analytics insights."
+    { 
+      title: "SEO & Analytics", 
+      icon: <BarChart3 className="w-8 h-8 text-red-500" />, 
+      color: "#ef4444",
+      description: "Improve your search rankings and track performance with data-driven SEO strategies. Comprehensive analytics and reporting to measure success."
     },
-    {
-      title: "Content Creation",
-      icon: <Camera className="w-16 h-16" />,
-      color: "#8b5cf6",
-      description: "Engaging and high-quality content that tells your story, attracts your audience, and converts visitors into loyal customers."
+    { 
+      title: "Content Creation", 
+      icon: <Camera className="w-8 h-8 text-red-500" />, 
+      color: "#ef4444",
+      description: "Engaging visual content that tells your story. Professional photography, videography, and graphic design that captures attention and drives engagement."
     },
-    {
-      title: "Technical Solutions",
-      icon: <Code className="w-16 h-16" />,
-      color: "#06b6d4",
-      description: "Custom software solutions, integrations, and technical consulting to streamline your business operations and boost efficiency."
+    { 
+      title: "Technical Solutions", 
+      icon: <Code className="w-8 h-8 text-red-500" />, 
+      color: "#ef4444",
+      description: "Custom software solutions and technical integrations. From APIs to automation tools, we solve complex technical challenges for your business."
     },
   ]
 
   return (
-    <section
-      ref={sectionRef}
-      id="services"
-      className="relative w-full min-h-screen py-20 bg-black"
-    >
-      {/* Section Headline - Separate from scrollable content */}
-      <div className="relative z-20 px-8">
-        <h2 className="text-5xl font-bold text-white text-center mb-20 font-display">
+    <section ref={sectionRef} className="relative w-full h-screen bg-black">
+      {/* Header */}
+      <div className="absolute top-8 left-0 right-0 z-20">
+        <h2 className="text-4xl font-bold text-white text-center font-display">
           Our Services
         </h2>
       </div>
 
-      {/* Horizontal Scroll Container */}
-      {isMobile ? (
-        <div className="flex flex-col items-center space-y-16 px-8">
+      {/* Cards Container */}
+      <div className="relative h-full flex items-center overflow-hidden">
+        <div 
+          ref={containerRef} 
+          className="flex flex-nowrap items-center"
+          style={{ 
+            width: 'max-content',
+            transform: 'translate3d(0, 0, 0)'
+          }}
+        >
           {services.map((service, i) => (
-            <ServiceCard key={i} {...service} />
-          ))}
-        </div>
-      ) : (
-        <div ref={containerRef} className="flex flex-nowrap items-center justify-center">
-          {services.map((service, i) => (
-            <div key={i} className="card-container flex items-center justify-center w-screen h-screen min-h-screen">
+            <div key={i} className="px-5">
               <ServiceCard {...service} />
-                      </div>
+            </div>
           ))}
         </div>
-      )}
+      </div>
     </section>
   )
 }

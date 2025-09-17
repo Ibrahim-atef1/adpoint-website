@@ -44,7 +44,7 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(185,28,28,0.04),transparent_50%)]" />
         </div>
 
-        <div className="relative z-10 w-full max-w-[1440px] mx-auto">
+        <div className="relative z-10">
           <LoadingOverlay />
           <Suspense fallback={null}>{children}</Suspense>
         </div>
