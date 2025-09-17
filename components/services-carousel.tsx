@@ -1,295 +1,309 @@
 "use client"
 
-import React from "react"
-import { motion, useTransform } from "framer-motion"
+import React, { useEffect, useRef, useState, useCallback } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Palette, Globe, Megaphone, BarChart3, Camera, Code } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { FadeUp } from "./fade-up"
-import { useHorizontalScroll } from "@/hooks/use-horizontal-scroll"
+
+// Register ScrollTrigger plugin
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+interface Particle {
+  x: number
+  y: number
+  r: number
+  dx: number
+  dy: number
+  alpha: number
+  life: number
+}
+
+interface ServiceCardProps {
+  title: string
+  icon: React.ReactNode
+  color: string
+  description: string
+}
+
+const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const animationFrameId = useRef<number | null>(null)
+  const particles = useRef<Particle[]>([])
+  const mouse = useRef({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+
+  const createParticle = useCallback((x: number, y: number): Particle => {
+    return {
+      x,
+      y,
+      r: Math.random() * 1 + 0.5,
+      dx: (Math.random() - 0.5) * 0.2,
+      dy: (Math.random() - 0.5) * 0.2,
+      alpha: Math.random() * 0.4 + 0.3,
+      life: Math.random() * 60 + 30,
+    }
+  }, [])
+
+  const initParticles = useCallback((canvas: HTMLCanvasElement) => {
+    particles.current = []
+    for (let i = 0; i < 10; i++) {
+      particles.current.push(
+        createParticle(Math.random() * canvas.width, Math.random() * canvas.height)
+      )
+    }
+  }, [createParticle])
+
+  const animateParticles = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    for (let i = 0; i < particles.current.length; i++) {
+      const p = particles.current[i]
+
+      // Apply cursor influence
+      const dxMouse = mouse.current.x - p.x
+      const dyMouse = mouse.current.y - p.y
+      const distance = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse)
+
+      if (distance < 100) {
+        p.dx -= (dxMouse / distance) * 0.005
+        p.dy -= (dyMouse / distance) * 0.005
+      }
+
+      p.x += p.dx
+      p.y += p.dy
+      p.life -= 1
+
+      // Bounce off walls
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1
+
+      // Fade out
+      p.alpha = Math.max(0, p.life / 60)
+
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(194,69,51, ${p.alpha * 0.4})`
+      ctx.fill()
+
+      // Remove dead particles and create new ones
+      if (p.life <= 0) {
+        particles.current[i] = createParticle(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height
+        )
+      }
+    }
+
+    animationFrameId.current = requestAnimationFrame(animateParticles)
+  }, [createParticle])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const handleResize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+      initParticles(canvas)
+    }
+
+    const handleMouseMove = (e: Event) => {
+      const mouseEvent = e as MouseEvent
+      const rect = (canvas as HTMLCanvasElement).getBoundingClientRect()
+      mouse.current = {
+        x: mouseEvent.clientX - rect.left,
+        y: mouseEvent.clientY - rect.top,
+      }
+    }
+
+    window.addEventListener("resize", handleResize)
+    canvas.addEventListener("mousemove", handleMouseMove as EventListener)
+
+    handleResize()
+    animationFrameId.current = requestAnimationFrame(animateParticles)
+
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current)
+      }
+      window.removeEventListener("resize", handleResize)
+      canvas.removeEventListener("mousemove", handleMouseMove as EventListener)
+    }
+  }, [animateParticles, initParticles])
+
+  return (
+    <div
+      className="relative w-[500px] h-[600px] bg-black rounded-3xl overflow-hidden flex-shrink-0
+                 transition-all duration-700 ease-out group cursor-pointer mx-auto"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        transform: isHovered 
+          ? `perspective(1000px) rotateX(${Math.sin(Date.now() * 0.001) * 1}deg) rotateY(${Math.cos(Date.now() * 0.001) * 1}deg) scale(1.02)` 
+          : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
+        boxShadow: isHovered 
+          ? `0 30px 60px rgba(194,69,51,0.4), 0 0 80px rgba(194,69,51,0.3)` 
+          : '0 15px 30px rgba(0,0,0,0.6)'
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        aria-hidden="true"
+      />
+      
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-transparent to-black/50" />
+      
+      {/* Main content */}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-12">
+        <div 
+          className="w-32 h-32 rounded-full flex items-center justify-center mb-8 transition-all duration-700"
+          style={{
+            background: `linear-gradient(135deg, ${color}20, ${color}40)`,
+            transform: isHovered ? 'scale(1.15) rotate(8deg)' : 'scale(1) rotate(0deg)',
+            boxShadow: isHovered ? `0 0 40px ${color}60` : 'none'
+          }}
+        >
+          <div className="text-6xl" style={{ color }}>
+            {icon}
+          </div>
+        </div>
+        
+        <h3 className="text-4xl font-bold text-white text-center font-display mb-4">
+          {title}
+        </h3>
+        
+        {/* Description that appears on hover */}
+        <div 
+          className={`text-lg text-gray-300 text-center leading-relaxed max-w-md transition-all duration-500 ${
+            isHovered 
+              ? 'opacity-100 transform translate-y-0' 
+              : 'opacity-0 transform translate-y-4'
+          }`}
+        >
+          {description}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function ServicesCarousel() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkIsMobile()
+    window.addEventListener("resize", checkIsMobile)
+    return () => window.removeEventListener("resize", checkIsMobile)
+  }, [])
+
+  useEffect(() => {
+    if (!sectionRef.current || !containerRef.current || isMobile) return
+
+    const cards = containerRef.current.querySelectorAll('.card-container')
+    const totalCards = cards.length
+    const cardWidth = window.innerWidth
+
+    const ctx = gsap.context(() => {
+      gsap.to(containerRef.current, {
+        x: -(cardWidth * (totalCards - 1)),
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          pin: true,
+          scrub: 1,
+          start: "top center",
+          end: () => `+=${cardWidth * totalCards}`,
+          invalidateOnRefresh: true,
+        },
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [isMobile])
+
   const services = [
     {
-      icon: Palette,
       title: "Brand Identity",
-      description:
-        "Complete brand development from logo design to comprehensive brand guidelines that make your business unforgettable.",
-      features: ["Logo Design", "Brand Guidelines", "Visual Identity", "Brand Strategy"],
+      icon: <Palette className="w-16 h-16" />,
+      color: "#ef4444",
+      description: "Complete brand development from logo design to comprehensive brand guidelines that make your business unforgettable and distinctive in the market."
     },
     {
-      icon: Globe,
       title: "Web Development",
-      description:
-        "Custom websites and web applications built with cutting-edge technology for optimal performance and user experience.",
-      features: ["Custom Development", "E-commerce", "CMS Integration", "Mobile Responsive"],
+      icon: <Globe className="w-16 h-16" />,
+      color: "#3b82f6",
+      description: "Custom websites and web applications built with cutting-edge technology for optimal performance, user experience, and business growth."
     },
     {
-      icon: Megaphone,
       title: "Digital Marketing",
-      description:
-        "Data-driven marketing campaigns across all digital channels to maximize your reach and conversion rates.",
-      features: ["SEO & SEM", "Social Media", "Content Marketing", "Email Campaigns"],
+      icon: <Megaphone className="w-16 h-16" />,
+      color: "#10b981",
+      description: "Data-driven marketing campaigns across all digital channels to maximize your reach, engagement, and conversion rates effectively."
     },
     {
-      icon: BarChart3,
       title: "SEO & Analytics",
-      description:
-        "Boost your online visibility and make informed decisions with our expert SEO strategies and in-depth analytics.",
-      features: ["Keyword Research", "On-Page SEO", "Technical SEO", "Performance Tracking"],
+      icon: <BarChart3 className="w-16 h-16" />,
+      color: "#f59e0b",
+      description: "Boost your online visibility and make informed decisions with our expert SEO strategies and comprehensive analytics insights."
     },
     {
-      icon: Camera,
       title: "Content Creation",
-      description:
-        "Engaging and high-quality content that tells your story, attracts your audience, and converts visitors into customers.",
-      features: ["Copywriting", "Photography", "Videography", "Animation"],
+      icon: <Camera className="w-16 h-16" />,
+      color: "#8b5cf6",
+      description: "Engaging and high-quality content that tells your story, attracts your audience, and converts visitors into loyal customers."
     },
     {
-      icon: Code,
       title: "Technical Solutions",
-      description:
-        "Custom software solutions, integrations, and technical consulting to streamline your business operations.",
-      features: ["Custom Software", "API Integration", "Automation", "Technical Consulting"],
+      icon: <Code className="w-16 h-16" />,
+      color: "#06b6d4",
+      description: "Custom software solutions, integrations, and technical consulting to streamline your business operations and boost efficiency."
     },
   ]
 
-  const { containerRef, currentSlide, translateX, isActive, isScrolling } = useHorizontalScroll({
-    totalSlides: services.length,
-    slideWidth: 344, // 320 card + ~24 gap
-  })
-
-  // Transform for horizontal movement
-  const trackX = useTransform(translateX, (value) => -value - 172)
-
   return (
-    <section className="relative bg-background overflow-hidden min-h-[100svh] flex items-center">
-      {/* Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(185,28,28,0.1),transparent_50%)]" />
+    <section
+      ref={sectionRef}
+      id="services"
+      className="relative w-full min-h-screen py-20 bg-black"
+    >
+      {/* Section Headline - Separate from scrollable content */}
+      <div className="relative z-20 px-8">
+        <h2 className="text-5xl font-bold text-white text-center mb-20 font-display">
+          Our Services
+        </h2>
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 w-full">
-        {/* Section Header */}
-        <FadeUp className="text-center mb-20">
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-8 text-balance">
-            Our Services
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
-            We offer a comprehensive suite of digital marketing and creative services designed to elevate your brand and
-            drive measurable results.
-          </p>
-          {isActive && (
-            <div className="mt-6 flex items-center justify-center space-x-2 text-primary">
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              <span className="text-sm font-medium">Screen frozen - Scroll horizontally to explore services</span>
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-            </div>
-          )}
-        </FadeUp>
-
-        {/* Progress Indicator */}
-        <div className="relative mb-12">
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-border/30 -translate-y-1/2" />
-          <motion.div
-            className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-primary via-primary/80 to-primary -translate-y-1/2"
-            style={{
-              width: `${((currentSlide + 1) / services.length) * 100}%`,
-            }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />
+      {/* Horizontal Scroll Container */}
+      {isMobile ? (
+        <div className="flex flex-col items-center space-y-16 px-8">
+          {services.map((service, i) => (
+            <ServiceCard key={i} {...service} />
+          ))}
         </div>
-
-        {/* Horizontal Scroll Container */}
-        <div ref={containerRef} className="relative h-[62vh] overflow-hidden py-8">
-          <motion.div
-            className="flex gap-6 absolute top-1/2 left-1/2 w-max -translate-y-1/2"
-            style={{ 
-              x: trackX,
-              willChange: "transform"
-            }}
-          >
-            {services.map((service, index) => (
-              <motion.div
-                key={service.title}
-                className="flex-shrink-0 w-[320px] group"
-                animate={{
-                  scale: index === currentSlide ? 1.02 : 0.95, 
-                  opacity: index === currentSlide ? 1 : 0.4,
-                  y: index === currentSlide ? -4 : 0
-                }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 100, 
-                  damping: 25, 
-                  mass: 1
-                }}
-                style={{ 
-                  willChange: "transform, opacity",
-                  transformStyle: "preserve-3d"
-                }}
-                whileHover={{
-                  scale: 1.02,
-                  y: -4,
-                  transition: {
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 20
-                  }
-                }}
-              >
-                <motion.div
-                  className="relative overflow-hidden rounded-xl"
-                  whileHover={{
-                    scale: 1.01,
-                    transition: {
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 20
-                    }
-                  }}
-                >
-                  <Card className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 border border-gray-700/50 hover:border-red-600/50 group h-[480px] transition-all duration-500 hover:shadow-2xl hover:shadow-red-600/20 backdrop-blur-sm relative overflow-hidden">
-                    {/* Glow Effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      whileHover={{ 
-                        scale: 1.1,
-                        opacity: 1,
-                        transition: {
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 15
-                        }
-                      }}
-                    />
-                    
-                    {/* Sweep Effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-red-600/10 via-transparent to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ 
-                        x: "100%",
-                        transition: {
-                          duration: 1.5,
-                          ease: "easeInOut"
-                        }
-                      }}
-                    />
-
-                    <CardContent className="p-5 space-y-4 h-full flex flex-col relative z-10">
-                    {/* Icon */}
-                      <motion.div 
-                        className="flex justify-center"
-                        whileHover={{
-                          scale: 1.1,
-                          rotate: 5,
-                          transition: {
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 15
-                          }
-                        }}
-                      >
-                        <div className="w-16 h-16 bg-gradient-to-br from-red-600/20 to-red-700/20 rounded-xl flex items-center justify-center group-hover:from-red-600/30 group-hover:to-red-700/30 transition-all duration-500 backdrop-blur-sm border border-red-600/20">
-                          <motion.div
-                            whileHover={{
-                              scale: 1.2,
-                              transition: {
-                                type: "spring",
-                                stiffness: 400,
-                                damping: 10
-                              }
-                            }}
-                          >
-                            <service.icon className="w-8 h-8 text-red-400 group-hover:text-red-300 transition-colors duration-300" />
-                          </motion.div>
+      ) : (
+        <div ref={containerRef} className="flex flex-nowrap items-center justify-center">
+          {services.map((service, i) => (
+            <div key={i} className="card-container flex items-center justify-center w-screen h-screen min-h-screen">
+              <ServiceCard {...service} />
                       </div>
-                      </motion.div>
-
-                    {/* Content */}
-                      <motion.div 
-                        className="text-center space-y-3 flex-grow"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                      >
-                        <motion.h3 
-                          className="font-display text-2xl font-bold text-white group-hover:text-red-300 transition-colors duration-300"
-                          whileHover={{
-                            scale: 1.05,
-                            transition: {
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 15
-                            }
-                          }}
-                        >
-                          {service.title}
-                        </motion.h3>
-                        <motion.p 
-                          className="text-muted-foreground leading-relaxed group-hover:text-gray-200 transition-colors duration-300"
-                          initial={{ opacity: 0.8 }}
-                          whileHover={{ opacity: 1 }}
-                        >
-                          {service.description}
-                        </motion.p>
-                      </motion.div>
-
-                    {/* Features */}
-                      <motion.div 
-                        className="space-y-2.5"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                      >
-                      {service.features.map((feature, featureIndex) => (
-                          <motion.div 
-                            key={featureIndex} 
-                            className="flex items-center space-x-3 group-hover:text-gray-200 transition-colors duration-300"
-                            whileHover={{
-                              x: 5,
-                              transition: {
-                                type: "spring",
-                                stiffness: 300,
-                                damping: 15
-                              }
-                            }}
-                          >
-                            <motion.div 
-                              className="w-2 h-2 bg-red-500 rounded-full group-hover:bg-red-400 transition-colors duration-300"
-                              whileHover={{
-                                scale: 1.5,
-                                transition: {
-                                  type: "spring",
-                                  stiffness: 400,
-                                  damping: 10
-                                }
-                              }}
-                            />
-                            <span className="text-sm text-gray-300 font-medium group-hover:text-gray-200 transition-colors duration-300">{feature}</span>
-                          </motion.div>
-                        ))}
-                      </motion.div>
-                  </CardContent>
-                </Card>
-                </motion.div>
-              </motion.div>
-            ))}
-          </motion.div>
+          ))}
         </div>
-
-        <FadeUp delay={0.4} className="text-center mt-8">
-          <Button
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-lg px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
-          >
-            Explore All Services
-          </Button>
-        </FadeUp>
-      </div>
+      )}
     </section>
   )
 }

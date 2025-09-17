@@ -31,9 +31,33 @@ export function Footer() {
             </div>
 
             <div className="flex items-center space-x-6 text-sm">
-              <a href="#services" className="text-muted-foreground hover:text-primary transition-colors">Services</a>
-              <a href="#portfolio" className="text-muted-foreground hover:text-primary transition-colors">Portfolio</a>
-              <a href="/about" className="text-muted-foreground hover:text-primary transition-colors">About</a>
+              <button 
+                onClick={() => {
+                  window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                  document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
+                }}
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                About
+              </button>
+              <button 
+                onClick={() => {
+                  window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                  document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })
+                }}
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Services
+              </button>
+              <button 
+                onClick={() => {
+                  window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                  document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth" })
+                }}
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Portfolio
+              </button>
               <a href="https://www.instagram.com/adpoint.eg?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors inline-flex items-center">
                 <Instagram className="w-4 h-4 mr-2" /> Instagram
               </a>

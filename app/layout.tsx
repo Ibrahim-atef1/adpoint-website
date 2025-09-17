@@ -28,6 +28,7 @@ export const metadata: Metadata = {
   generator: "v0.app",
 }
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,7 +44,7 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(185,28,28,0.04),transparent_50%)]" />
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 w-full max-w-[1440px] mx-auto">
           <LoadingOverlay />
           <Suspense fallback={null}>{children}</Suspense>
         </div>

@@ -50,12 +50,25 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a
-              href="/about"
+            <button
+              onClick={() => {
+                window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                scrollToSection("about")
+              }}
               className="text-white hover:text-red-700 transition-colors duration-200 font-medium"
             >
               About Us
-            </a>
+            </button>
+
+            <button
+              onClick={() => {
+                window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                scrollToSection("services")
+              }}
+              className="text-white hover:text-red-700 transition-colors duration-200 font-medium"
+            >
+              Services
+            </button>
 
             <button
               onClick={() => {
@@ -95,13 +108,28 @@ export function Navigation() {
               className="md:hidden bg-black/95 backdrop-blur-md border-t border-white/10"
             >
               <div className="px-4 py-6 space-y-4">
-                <a
-                  href="/about"
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                    scrollToSection("about")
+                    setIsMobileMenuOpen(false)
+                  }}
                   className="block w-full text-left text-white hover:text-red-700 transition-colors font-medium py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   About Us
-                </a>
+                </button>
+
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                    scrollToSection("services")
+                    setIsMobileMenuOpen(false)
+                  }}
+                  className="block w-full text-left text-white hover:text-red-700 transition-colors font-medium py-2"
+                >
+                  Services
+                </button>
+
                 <button
                   onClick={() => {
                     window.dispatchEvent(new Event("adpoint:bypass-hijack"))

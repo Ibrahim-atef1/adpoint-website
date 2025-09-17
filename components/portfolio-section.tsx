@@ -1,364 +1,331 @@
 "use client"
 
-import React from "react"
-import { motion, useTransform } from "framer-motion"
+import React, { useEffect, useRef, useState, useCallback } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useHorizontalScroll } from "@/hooks/use-horizontal-scroll"
-import { FadeUp } from "./fade-up"
+
+// Register ScrollTrigger plugin
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+interface Particle {
+  x: number
+  y: number
+  r: number
+  dx: number
+  dy: number
+  alpha: number
+  life: number
+}
+
+interface ProjectCardProps {
+  image: string
+  title: string
+  category: string
+  results: string
+  description: string
+}
+
+const ProjectCard: React.FC<ProjectCardProps> = ({
+  image,
+  title,
+  category,
+  results,
+  description,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const animationFrameId = useRef<number | null>(null)
+  const particles = useRef<Particle[]>([])
+  const mouse = useRef({ x: 0, y: 0 })
+  const [isHovered, setIsHovered] = useState(false)
+
+  const createParticle = useCallback((x: number, y: number): Particle => {
+    return {
+      x,
+      y,
+      r: Math.random() * 1 + 0.5,
+      dx: (Math.random() - 0.5) * 0.2,
+      dy: (Math.random() - 0.5) * 0.2,
+      alpha: Math.random() * 0.4 + 0.3,
+      life: Math.random() * 60 + 30,
+    }
+  }, [])
+
+  const initParticles = useCallback((canvas: HTMLCanvasElement) => {
+    particles.current = []
+    for (let i = 0; i < 10; i++) {
+      particles.current.push(
+        createParticle(Math.random() * canvas.width, Math.random() * canvas.height)
+      )
+    }
+  }, [createParticle])
+
+  const animateParticles = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    for (let i = 0; i < particles.current.length; i++) {
+      const p = particles.current[i]
+
+      // Apply cursor influence
+      const dxMouse = mouse.current.x - p.x
+      const dyMouse = mouse.current.y - p.y
+      const distance = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse)
+
+      if (distance < 100) {
+        p.dx -= (dxMouse / distance) * 0.005
+        p.dy -= (dyMouse / distance) * 0.005
+      }
+
+      p.x += p.dx
+      p.y += p.dy
+      p.life -= 1
+
+      // Bounce off walls
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1
+
+      // Fade out
+      p.alpha = Math.max(0, p.life / 60)
+
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(194,69,51, ${p.alpha * 0.4})`
+      ctx.fill()
+
+      // Remove dead particles and create new ones
+      if (p.life <= 0) {
+        particles.current[i] = createParticle(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height
+        )
+      }
+    }
+
+    animationFrameId.current = requestAnimationFrame(animateParticles)
+  }, [createParticle])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const handleResize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+      initParticles(canvas)
+    }
+
+    const handleMouseMove = (e: Event) => {
+      const mouseEvent = e as MouseEvent
+      const rect = (canvas as HTMLCanvasElement).getBoundingClientRect()
+      mouse.current = {
+        x: mouseEvent.clientX - rect.left,
+        y: mouseEvent.clientY - rect.top,
+      }
+    }
+
+    window.addEventListener("resize", handleResize)
+    canvas.addEventListener("mousemove", handleMouseMove as EventListener)
+
+    handleResize()
+    animationFrameId.current = requestAnimationFrame(animateParticles)
+
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current)
+      }
+      window.removeEventListener("resize", handleResize)
+      canvas.removeEventListener("mousemove", handleMouseMove as EventListener)
+    }
+  }, [animateParticles, initParticles])
+
+  return (
+    <div
+      className="relative w-[500px] h-[600px] bg-black rounded-3xl overflow-hidden flex-shrink-0
+                 transition-all duration-700 ease-out group cursor-pointer mx-auto"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        transform: isHovered 
+          ? `perspective(1000px) rotateX(${Math.sin(Date.now() * 0.001) * 1}deg) rotateY(${Math.cos(Date.now() * 0.001) * 1}deg) scale(1.02)` 
+          : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
+        boxShadow: isHovered 
+          ? `0 30px 60px rgba(194,69,51,0.4), 0 0 80px rgba(194,69,51,0.3)` 
+          : '0 15px 30px rgba(0,0,0,0.6)'
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        aria-hidden="true"
+      />
+      
+      {/* Project Image */}
+      <div className="relative w-full h-full">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          className={`object-cover transition-all duration-700 ease-out ${
+            isHovered ? "grayscale-0 scale-105" : "grayscale scale-100"
+          }`}
+          sizes="600px"
+          priority={false}
+        />
+        
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+        
+        {/* Results badge */}
+        <div className="absolute top-6 right-6 bg-red-600/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold">
+          {results}
+        </div>
+        
+        {/* Content overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-8">
+          <div className="text-red-400 text-sm font-medium mb-3 uppercase tracking-wider">
+            {category}
+          </div>
+          <h3 className="text-4xl font-bold text-white font-display mb-4">
+            {title}
+          </h3>
+          
+          {/* Description that appears on hover */}
+          <div 
+            className={`text-lg text-gray-300 leading-relaxed max-w-lg transition-all duration-500 ${
+              isHovered 
+                ? 'opacity-100 transform translate-y-0' 
+                : 'opacity-0 transform translate-y-4'
+            }`}
+          >
+            {description}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function PortfolioSection() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkIsMobile()
+    window.addEventListener("resize", checkIsMobile)
+    return () => window.removeEventListener("resize", checkIsMobile)
+  }, [])
+
+  useEffect(() => {
+    if (!sectionRef.current || !containerRef.current || isMobile) return
+
+    const cards = containerRef.current.querySelectorAll('.card-container')
+    const totalCards = cards.length
+    const cardWidth = window.innerWidth
+
+    const ctx = gsap.context(() => {
+      gsap.to(containerRef.current, {
+        x: -(cardWidth * (totalCards - 1)),
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          pin: true,
+          scrub: 1,
+          start: "top center",
+          end: () => `+=${cardWidth * totalCards}`,
+          invalidateOnRefresh: true,
+        },
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [isMobile])
+
   const projects = [
     {
-      title: "TechFlow Solutions",
-      category: "Brand Identity & Web Development",
-      description:
-        "Complete rebrand and website redesign for a leading tech consultancy, resulting in 200% increase in qualified leads.",
-      image: "/modern-tech-website-design-with-dark-theme-and-blu.jpg",
-      tags: ["Branding", "Web Design", "Development"],
-      results: "+200% Leads",
+      image: "/architecture-firm-logo-with-building-silhouette.jpg",
+      title: "Architecture Firm",
+      category: "Brand Identity",
+      results: "40% Growth",
+      description: "A comprehensive brand identity system for a modern architecture firm, featuring clean typography, sophisticated color palette, and memorable logo design that reflects their innovative approach to sustainable building design."
     },
     {
-      title: "EcoVibe Marketplace",
-      category: "E-commerce & Digital Marketing",
-      description:
-        "Full-scale e-commerce platform with integrated marketing automation, achieving 150% growth in first quarter.",
-      image: "/eco-friendly-marketplace-website-with-green-theme-.jpg",
-      tags: ["E-commerce", "Marketing", "SEO"],
-      results: "+150% Growth",
-    },
-    {
-      title: "Artisan Coffee Co.",
-      category: "Brand Strategy & Content Creation",
-      description:
-        "Brand positioning and content strategy that transformed a local coffee shop into a regional franchise.",
       image: "/coffee-shop-branding-with-warm-colors-and-artisan-.jpg",
-      tags: ["Strategy", "Content", "Photography"],
-      results: "5x Locations",
+      title: "Coffee Shop Brand",
+      category: "Visual Design",
+      results: "25% Sales Up",
+      description: "Warm and inviting brand identity for an artisanal coffee shop, incorporating hand-drawn elements, earthy tones, and authentic storytelling that resonates with coffee enthusiasts and local community members."
     },
     {
-      title: "FinanceForward",
-      category: "Web App & UX Design",
-      description:
-        "Intuitive financial dashboard design that improved user engagement by 300% and reduced support tickets.",
-      image: "/financial-dashboard-interface-with-charts-and-mode.jpg",
-      tags: ["UX/UI", "Development", "Analytics"],
-      results: "+300% Engagement",
+      image: "/digital-agency-logo-with-modern-geometric-design.jpg",
+      title: "Digital Agency",
+      category: "Web Design",
+      results: "60% Leads",
+      description: "Modern, geometric brand identity for a cutting-edge digital agency, featuring bold typography, dynamic layouts, and a tech-forward aesthetic that positions them as industry leaders in digital innovation."
     },
     {
-      title: "Wellness Retreat",
-      category: "Social Media & Influencer Marketing",
-      description:
-        "Engaging social media campaigns and influencer collaborations that boosted brand awareness by 400%.",
-      image: "/wellness-retreat-website-design-with-natural-theme.jpg",
-      tags: ["Social Media", "Influencer", "Content"],
-      results: "+400% Reach",
+      image: "/eco-friendly-brand-logo-with-green-leaf-element.jpg",
+      title: "Eco Brand",
+      category: "Brand Strategy",
+      results: "35% Engagement",
+      description: "Sustainable brand identity for an eco-friendly company, emphasizing environmental consciousness through organic shapes, green color schemes, and messaging that connects with environmentally conscious consumers."
     },
     {
-      title: "Urban Eats",
-      category: "Mobile App Development",
-      description:
-        "Developed a seamless food delivery mobile app, enhancing user experience and increasing order volume by 250%.",
-      image: "/food-delivery-app-interface-with-modern-design-and.jpg",
-      tags: ["Mobile App", "UX/UI", "Development"],
-      results: "+250% Orders",
+      image: "/financial-services-logo-with-professional-design.jpg",
+      title: "Financial Services",
+      category: "Corporate Design",
+      results: "50% Trust Score",
+      description: "Professional and trustworthy brand identity for a financial services firm, featuring clean lines, conservative color palette, and design elements that convey stability, reliability, and expertise in financial matters."
     },
     {
-      title: "Global Connect",
-      category: "SEO & Content Strategy",
-      description:
-        "Comprehensive SEO audit and content strategy leading to top rankings for competitive keywords and increased organic traffic.",
-      image: "/global-connect-website-design-with-world-map-and-d.jpg",
-      tags: ["Portfolio", "SEO", "Photography"],
-      results: "#1 Rankings",
+      image: "/tech-company-logo-with-modern-typography.jpg",
+      title: "Tech Startup",
+      category: "UI/UX Design",
+      results: "80% User Growth",
+      description: "Innovative brand identity for a tech startup, combining modern typography, vibrant colors, and futuristic design elements that capture the company's forward-thinking approach and technological expertise."
     },
   ]
 
-  const { containerRef, currentSlide, translateX, isActive, isScrolling } = useHorizontalScroll({
-    totalSlides: projects.length,
-    slideWidth: 344, // match services for consistent spring
-  })
-
-  // Transform for horizontal movement
-  const trackX = useTransform(translateX, (value) => -value - 172)
-
   return (
-    <section className="relative bg-black overflow-hidden min-h-[100svh] flex items-center">
-      {/* Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(185,28,28,0.15),transparent_50%)]" />
+    <section
+      ref={sectionRef}
+      id="portfolio"
+      className="relative w-full min-h-screen py-20 bg-black"
+    >
+      {/* Section Headline - Separate from scrollable content */}
+      <div className="relative z-20 px-8">
+        <h2 className="text-5xl font-bold text-white text-center mb-20 font-display">
+          Our Work
+        </h2>
       </div>
 
-      {/* Floating Background Elements */}
-      <div className="absolute inset-0 opacity-25">
-        <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-red-600/15 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-red-700/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-2/3 left-2/3 w-64 h-64 bg-red-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }} />
-      </div>
-
-      <div className="max-w-7xl mx-auto relative z-10 w-full">
-        {/* Section Header */}
-        <FadeUp className="text-center mb-20">
-          <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-8 text-balance">
-            Our
-            <span className="gradient-red"> Work</span>
-          </h2>
-
-          <div className="space-y-6">
-            <div className="flex justify-center items-center space-x-4">
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              <span className="text-2xl text-primary font-semibold tracking-wide">
-                TRANSFORMING BRANDS INTO LEGENDS
-              </span>
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-            </div>
-
-            <div className="w-32 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto" />
-            
-            {isActive && (
-              <div className="mt-6 flex items-center justify-center space-x-2 text-primary">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                <span className="text-sm font-medium">Screen frozen - Scroll horizontally to explore portfolio</span>
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              </div>
-            )}
-          </div>
-        </FadeUp>
-
-        {/* Progress Indicator */}
-        <div className="relative mb-12">
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-border/30 -translate-y-1/2" />
-          <motion.div
-            className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-primary via-primary/80 to-primary -translate-y-1/2"
-            style={{
-              width: `${((currentSlide + 1) / projects.length) * 100}%`,
-            }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />
+      {/* Horizontal Scroll Container */}
+      {isMobile ? (
+        <div className="flex flex-col items-center space-y-16 px-8">
+          {projects.map((project, i) => (
+            <ProjectCard key={i} {...project} />
+          ))}
         </div>
-
-        {/* Horizontal Scroll Container */}
-        <div ref={containerRef} className="relative h-[62vh] overflow-hidden py-8">
-          <motion.div
-            className="flex gap-6 absolute top-1/2 left-1/2 -translate-y-1/2"
-            style={{ 
-              x: trackX,
-              willChange: "transform"
-            }}
-          >
-            {projects.map((project, index) => (
-              <motion.div
-                key={project.title}
-                className="flex-shrink-0 w-[320px] group"
-                animate={{ 
-                  scale: index === currentSlide ? 1.02 : 0.95, 
-                  opacity: index === currentSlide ? 1 : 0.4, 
-                  y: index === currentSlide ? -4 : 0
-                }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 100, 
-                  damping: 25, 
-                  mass: 1
-                }}
-                style={{ 
-                  transformStyle: "preserve-3d",
-                  willChange: "transform, opacity"
-                }}
-                whileHover={{
-                  scale: 1.02,
-                  y: -4,
-                  transition: {
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 20
-                  }
-                }}
-              >
-                <motion.div
-                  className="relative overflow-hidden rounded-xl"
-                  whileHover={{
-                    scale: 1.01,
-                    transition: {
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 20
-                    }
-                  }}
-                >
-                  <Card className="bg-gradient-to-br from-gray-900/90 to-gray-800/90 border border-gray-700/50 hover:border-red-600/50 transition-all duration-500 group overflow-hidden h-[480px] backdrop-blur-sm hover:shadow-2xl hover:shadow-red-600/20 relative">
-                    {/* Glow Effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      whileHover={{ 
-                        scale: 1.1,
-                        opacity: 1,
-                        transition: {
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 15
-                        }
-                      }}
-                    />
-                    
-                    {/* Sweep Effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-red-600/10 via-transparent to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ 
-                        x: "100%",
-                        transition: {
-                          duration: 2,
-                          ease: "easeInOut"
-                        }
-                      }}
-                    />
-
-                    <div className="relative overflow-hidden h-36">
-                      <motion.div
-                        whileHover={{
-                          scale: 1.05,
-                          transition: {
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 15
-                          }
-                        }}
-                      >
-                        <Image
-                          src={project.image || "/placeholder.svg"}
-                          alt={project.title}
-                          width={780}
-                          height={320}
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 520px, 780px"
-                          className="w-full h-36 object-cover transition-all duration-700 group-hover:brightness-110 group-hover:contrast-110"
-                          loading={index < 2 ? "eager" : "lazy"}
-                          priority={index < 2}
-                          placeholder="blur"
-                          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                        />
-                      </motion.div>
-                      
-                      {/* Results Badge */}
-                      <motion.div 
-                        className="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg z-20"
-                        whileHover={{
-                          scale: 1.1,
-                          transition: {
-                            type: "spring",
-                            stiffness: 400,
-                            damping: 10
-                          }
-                        }}
-                      >
-                        {project.results}
-                      </motion.div>
-                      
-                      {/* Project Category Overlay */}
-                      <motion.div 
-                        className="absolute bottom-4 left-4 right-4 z-20"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileHover={{ 
-                          opacity: 1, 
-                          y: 0,
-                          transition: {
-                            type: "spring",
-                            stiffness: 200,
-                            damping: 20
-                          }
-                        }}
-                      >
-                        <div className="bg-black/70 backdrop-blur-sm rounded-lg p-3 border border-gray-600/50">
-                          <p className="text-white text-sm font-medium">{project.category}</p>
-                        </div>
-                      </motion.div>
+      ) : (
+        <div ref={containerRef} className="flex flex-nowrap items-center justify-center">
+          {projects.map((project, i) => (
+            <div key={i} className="card-container flex items-center justify-center w-screen h-screen min-h-screen">
+              <ProjectCard {...project} />
                     </div>
-
-                    <CardContent className="p-6 space-y-4 relative z-10">
-                      <motion.div 
-                        className="space-y-3"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                      >
-                        <motion.h3 
-                          className="font-display text-xl font-bold text-white group-hover:text-red-400 transition-colors duration-300"
-                          whileHover={{
-                            scale: 1.05,
-                            transition: {
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 15
-                            }
-                          }}
-                        >
-                          {project.title}
-                        </motion.h3>
-                        <motion.div 
-                          className="w-12 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full group-hover:w-16 transition-all duration-500"
-                          whileHover={{
-                            scaleX: 1.3,
-                            transition: {
-                              type: "spring",
-                              stiffness: 300,
-                              damping: 15
-                            }
-                          }}
-                        />
-                      </motion.div>
-
-                      <motion.p 
-                        className="text-sm text-gray-300 leading-relaxed group-hover:text-white transition-colors duration-300 line-clamp-3"
-                        initial={{ opacity: 0.8 }}
-                        whileHover={{ opacity: 1 }}
-                      >
-                        {project.description}
-                      </motion.p>
-
-                      <motion.div 
-                        className="flex flex-wrap gap-2 pt-2"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                      >
-                        {project.tags.map((tag, tagIndex) => (
-                          <motion.span
-                            key={tagIndex}
-                            className="px-3 py-1 bg-gray-800/50 text-gray-300 text-xs rounded-full border border-gray-700 group-hover:bg-red-600/20 group-hover:text-red-400 group-hover:border-red-600/50 transition-all duration-300"
-                            whileHover={{
-                              scale: 1.1,
-                              y: -2,
-                              transition: {
-                                type: "spring",
-                                stiffness: 300,
-                                damping: 15
-                              }
-                            }}
-                          >
-                            {tag}
-                          </motion.span>
-                        ))}
-                      </motion.div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-            ))}
-          </motion.div>
+          ))}
         </div>
-
-        <div className="flex justify-center mt-8">
-          <Button
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-lg px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
-          >
-            View All Projects
-          </Button>
-        </div>
-      </div>
+      )}
     </section>
   )
 }

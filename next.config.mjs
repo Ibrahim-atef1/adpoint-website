@@ -10,6 +10,14 @@ const nextConfig = {
     // Enable Next.js Image Optimization
     formats: ["image/avif", "image/webp"],
   },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.mjs$/,
+      include: /node_modules/,
+      type: "javascript/auto",
+    });
+    return config;
+  },
 }
 
 export default nextConfig
