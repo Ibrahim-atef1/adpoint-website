@@ -50,7 +50,7 @@ export function FloatingCTA() {
               damping: 30,
               duration: 0.3 
             }}
-            className="fixed bottom-8 right-8 z-40"
+            className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-40"
             style={{
               transform: `translateY(${Math.sin(scrollY * 0.01) * 5}px)`,
             }}
@@ -59,9 +59,9 @@ export function FloatingCTA() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleClick}
-              className="group relative bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white p-4 rounded-full shadow-2xl shadow-red-600/25 transition-all duration-300 hover:shadow-red-600/40"
+              className="group relative bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white p-3 sm:p-4 rounded-full shadow-2xl shadow-red-600/25 transition-all duration-300 hover:shadow-red-600/40 min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
-              <Calendar className="w-6 h-6" />
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
               
               {/* Pulse ring effect */}
               <motion.div

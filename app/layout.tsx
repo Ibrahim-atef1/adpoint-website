@@ -1,11 +1,12 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Poppins, Montserrat } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { CursorEffect } from "@/components/cursor-effect"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { FloatingCTA } from "@/components/floating-cta"
+import { FormProvider } from "@/contexts/FormContext"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -26,7 +27,12 @@ export const metadata: Metadata = {
   title: "AdPoint — Creative Marketing Agency",
   description: "Premium digital marketing agency specializing in creative campaigns, branding, and web development.",
   generator: "v0.app",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
   themeColor: "#ef4444",
 }
 
@@ -62,12 +68,14 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(185,28,28,0.04),transparent_50%)]" />
         </div>
 
-        <div className="relative z-10">
-          <LoadingOverlay />
-          <Suspense fallback={null}>{children}</Suspense>
-        </div>
-        <FloatingCTA />
-        <Analytics />
+        <FormProvider>
+          <div className="relative z-10">
+            <LoadingOverlay />
+            <Suspense fallback={null}>{children}</Suspense>
+          </div>
+          <FloatingCTA />
+          <Analytics />
+        </FormProvider>
       </body>
     </html>
   )

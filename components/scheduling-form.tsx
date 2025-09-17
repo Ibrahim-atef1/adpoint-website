@@ -239,11 +239,11 @@ export function SchedulingForm() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto p-8 bg-gradient-to-br from-black via-gray-900 to-black rounded-2xl border border-gray-800 shadow-2xl"
+      className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-black via-gray-900 to-black rounded-2xl border border-gray-800 shadow-2xl"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Schedule Your Consultation</h2>
-        <p className="text-gray-300">Let's discuss your project and bring your vision to life</p>
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Schedule Your Consultation</h2>
+        <p className="text-gray-300 text-sm sm:text-base">Let's discuss your project and bring your vision to life</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -256,7 +256,7 @@ export function SchedulingForm() {
           type="text"
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
-          className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-colors duration-200 ${
+          className={`w-full px-3 sm:px-4 py-3 sm:py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-colors duration-200 text-sm sm:text-base ${
             errors.name ? "border-red-500" : "border-gray-700"
           }`}
           placeholder="Enter your full name"
