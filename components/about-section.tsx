@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 import { Target, Lightbulb, Users, TrendingUp } from "lucide-react"
+import { MobileScrollAnimation } from "@/components/mobile-scroll-animation"
 // FadeUp component replaced with motion.div
 
 export function AboutSection() {
@@ -85,8 +86,10 @@ export function AboutSection() {
           >
             <div className="grid grid-cols-2 gap-4 sm:gap-6">
               {stats.map((stat, index) => (
-                <div
+                <MobileScrollAnimation
                   key={stat.label}
+                  animationType="scale-in"
+                  staggerDelay={index * 0.1}
                   className="bg-card border border-border rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:border-primary/50 transition-all duration-500 group"
                 >
                   <div className="flex justify-center mb-4 sm:mb-6">
@@ -98,7 +101,7 @@ export function AboutSection() {
                     <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{stat.value}</div>
                     <div className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</div>
                   </div>
-                </div>
+                </MobileScrollAnimation>
               ))}
             </div>
           </motion.div>

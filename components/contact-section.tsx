@@ -9,6 +9,7 @@ import { Mail, Phone, MapPin, X, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SchedulingForm } from "@/components/scheduling-form"
 import { useForm } from "@/contexts/FormContext"
+import { MobileScrollAnimation } from "@/components/mobile-scroll-animation"
 
 export function ContactSection() {
   const ref = useRef(null)
@@ -87,11 +88,10 @@ export function ContactSection() {
           {/* Contact Information Cards */}
           <div ref={ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {contactInfo.map((info, index) => (
-              <motion.div
+              <MobileScrollAnimation
                 key={info.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+                animationType="fade-in"
+                staggerDelay={index * 0.1}
                 className="text-center p-6 sm:p-8 bg-card/50 border border-border/50 rounded-xl hover:border-primary/50 transition-all duration-300 hover-lift backdrop-blur-sm"
               >
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
@@ -100,7 +100,7 @@ export function ContactSection() {
                 <h3 className="font-semibold text-white text-lg sm:text-xl mb-2">{info.title}</h3>
                 <p className="text-primary font-medium text-base sm:text-lg mb-2">{info.details}</p>
                 <p className="text-xs sm:text-sm text-muted-foreground">{info.description}</p>
-              </motion.div>
+              </MobileScrollAnimation>
             ))}
           </div>
         </div>

@@ -119,12 +119,12 @@ export function WorkingCinematicFooter() {
                   alt="AdPoint Logo"
                   width={600}
                   height={240}
-                  className="h-32 sm:h-40 lg:h-48 xl:h-56 w-auto mx-auto lg:mx-0 mb-6 sm:mb-8"
+                  className="h-24 sm:h-32 lg:h-48 xl:h-56 w-auto mx-auto lg:mx-0 mb-4 sm:mb-6 lg:mb-8"
                 />
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-red-100 mb-4 sm:mb-6 leading-tight">
+                <h2 className="text-xl sm:text-2xl lg:text-4xl xl:text-5xl font-bold text-red-100 mb-3 sm:mb-4 lg:mb-6 leading-tight">
                   Let's Create Something Amazing
                 </h2>
-                <p className="text-red-200 text-base sm:text-lg xl:text-xl leading-relaxed">
+                <p className="text-red-200 text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed">
                   Transform your vision into extraordinary digital experiences that captivate and inspire your audience.
                 </p>
               </div>
@@ -132,7 +132,7 @@ export function WorkingCinematicFooter() {
 
             {/* Right Side - Navigation & Contact */}
             <motion.div 
-              className="w-full lg:w-1/2 lg:flex-1 flex flex-col items-end lg:items-end"
+              className="w-full lg:w-1/2 lg:flex-1 flex flex-col items-center lg:items-end"
               initial={{ x: 50, opacity: 0 }}
               animate={{ 
                 x: scrollProgress > 0.15 ? 0 : 20,
@@ -140,9 +140,9 @@ export function WorkingCinematicFooter() {
               }}
               transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <div className="w-auto space-y-6 sm:space-y-8 mt-40 lg:mt-48">
+              <div className="w-full lg:w-auto space-y-6 sm:space-y-8 mt-8 sm:mt-12 lg:mt-48">
                 {/* Navigation Menu Buttons */}
-                <div className="w-auto space-y-6">
+                <div className="w-full lg:w-auto space-y-4 sm:space-y-6">
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ 
@@ -153,7 +153,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("about")}
-                      className="text-white hover:text-red-200 text-lg sm:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-end hover:scale-105"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
                     >
                       About Us
                     </button>
@@ -169,7 +169,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("services")}
-                      className="text-white hover:text-red-200 text-lg sm:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-end hover:scale-105"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
                     >
                       Services
                     </button>
@@ -185,7 +185,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("portfolio")}
-                      className="text-white hover:text-red-200 text-lg sm:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-end hover:scale-105"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
                     >
                       Portfolio
                     </button>
@@ -201,7 +201,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("contact")}
-                      className="text-white hover:text-red-200 text-lg sm:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-end hover:scale-105"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
                     >
                       Work With Us
                     </button>

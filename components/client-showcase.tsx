@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
+import { MobileScrollAnimation } from "@/components/mobile-scroll-animation"
 // FadeUp component replaced with motion.div
 
 const clients = [
@@ -129,11 +130,10 @@ export function ClientShowcase() {
               { number: "150%", label: "Average Growth" },
               { number: "8+", label: "Years Experience" },
             ].map((stat, index) => (
-              <motion.div
+              <MobileScrollAnimation
                 key={stat.label}
-                initial={{ opacity: 0, y: 30 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
+                animationType="scale-in"
+                staggerDelay={index * 0.1}
                 className="text-center group"
               >
                 <div className="bg-gray-900/30 hover:bg-gray-800/50 border border-gray-800 hover:border-red-600/30 rounded-xl p-4 sm:p-6 transition-all duration-300 group-hover:scale-105">
@@ -144,7 +144,7 @@ export function ClientShowcase() {
                     {stat.label}
                   </div>
                 </div>
-              </motion.div>
+              </MobileScrollAnimation>
             ))}
           </div>
         </motion.div>

@@ -669,6 +669,108 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
     }
+    
+    /* Mobile scroll animations */
+    .mobile-scroll-animate {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .mobile-scroll-animate.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Mobile fade in animations */
+    .mobile-fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .mobile-fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Mobile slide in animations */
+    .mobile-slide-in-left {
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .mobile-slide-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .mobile-slide-in-right {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .mobile-slide-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    /* Mobile scale animations */
+    .mobile-scale-in {
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .mobile-scale-in.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    /* Mobile stagger animations */
+    .mobile-stagger-1 { transition-delay: 0.1s; }
+    .mobile-stagger-2 { transition-delay: 0.2s; }
+    .mobile-stagger-3 { transition-delay: 0.3s; }
+    .mobile-stagger-4 { transition-delay: 0.4s; }
+    .mobile-stagger-5 { transition-delay: 0.5s; }
+    
+    /* Mobile performance optimizations */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* Allow text selection for input fields */
+    input, textarea {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+    
+    /* Optimize scrolling performance */
+    body {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    
+    /* Reduce motion for better performance */
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-scroll-animate,
+      .mobile-fade-in,
+      .mobile-slide-in-left,
+      .mobile-slide-in-right,
+      .mobile-scale-in {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
   }
 
 
