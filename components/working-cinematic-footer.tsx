@@ -11,7 +11,7 @@ export function WorkingCinematicFooter() {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const { isFormOpen, isNavigating } = useForm()
+  const { isFormOpen, isNavigating, setIsNavigating } = useForm()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,7 +58,17 @@ export function WorkingCinematicFooter() {
   }, [isFormOpen, isNavigating])
 
   const scrollToSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
+    if (sectionId === "contact") {
+      // Prevent footer from triggering when scrolling to contact
+      setIsNavigating(true)
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
+      // Reset navigation state after scroll completes
+      setTimeout(() => {
+        setIsNavigating(false)
+      }, 1000)
+    } else {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
+    }
   }
 
   const goToTop = () => {
@@ -215,31 +225,23 @@ export function WorkingCinematicFooter() {
                   className="w-full pt-6 sm:pt-8 lg:pt-12 border-t border-red-300/20"
                   initial={{ opacity: 0, y: 25 }}
                   animate={{ 
-                    opacity: scrollProgress > 0.2 ? 1 : 0,
-                    y: scrollProgress > 0.2 ? 0 : 10
+                    opacity: 1,
+                    y: 0
                   }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   <div className="space-y-4 lg:space-y-6">
-                    <motion.div 
-                      className="flex items-center space-x-4 hidden sm:flex"
-                      initial={{ opacity: 0, x: 15 }}
-                      animate={{ 
-                        opacity: scrollProgress > 0.22 ? 1 : 0,
-                        x: scrollProgress > 0.22 ? 0 : 8
-                      }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                    >
+                    <div className="flex items-center space-x-4">
                       <a 
                         href="https://instagram.com/adpoint.agency" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200"
                       >
-                        <Instagram className="w-5 h-5 text-red-400" />
+                        <Instagram className="w-6 h-6 text-red-400" />
                         <span className="text-red-200 text-base lg:text-lg">@adpoint.agency</span>
                       </a>
-                    </motion.div>
+                    </div>
                     
                     <motion.div 
                       className="flex items-center space-x-4"

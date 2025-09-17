@@ -4,8 +4,8 @@ import type React from "react"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef, useState } from "react"
-import { Mail, Phone, MapPin, X, Calendar } from "lucide-react"
+import { useRef, useState, useEffect } from "react"
+import { Mail, Phone, MapPin, X, Calendar, Sparkles, Zap, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SchedulingForm } from "@/components/scheduling-form"
 import { useForm } from "@/contexts/FormContext"
@@ -15,7 +15,17 @@ export function ContactSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isSchedulingOpen, setIsSchedulingOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const { setIsFormOpen } = useForm()
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
 
   const contactInfo = [
@@ -41,8 +51,78 @@ export function ContactSection() {
 
   return (
     <>
-      <section id="contact" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-background noise-overlay">
-        <div className="max-w-7xl mx-auto">
+      <section id="contact" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-background noise-overlay relative overflow-hidden">
+        {/* Mobile floating elements */}
+        {isMobile && (
+          <>
+            <motion.div
+              className="absolute top-20 left-8 text-primary/20 md:hidden"
+              animate={{
+                y: [-10, 10, -10],
+                rotate: [0, 5, 0],
+                opacity: [0.2, 0.5, 0.2],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+            >
+              <Sparkles className="w-5 h-5" />
+            </motion.div>
+            <motion.div
+              className="absolute top-40 right-12 text-primary/20 md:hidden"
+              animate={{
+                y: [8, -8, 8],
+                rotate: [0, -3, 0],
+                opacity: [0.15, 0.4, 0.15],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            >
+              <Zap className="w-4 h-4" />
+            </motion.div>
+            <motion.div
+              className="absolute bottom-32 left-12 text-primary/20 md:hidden"
+              animate={{
+                y: [-6, 6, -6],
+                rotate: [0, 4, 0],
+                opacity: [0.1, 0.3, 0.1],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+            >
+              <Star className="w-3 h-3" />
+            </motion.div>
+            <motion.div
+              className="absolute bottom-20 right-8 text-primary/20 md:hidden"
+              animate={{
+                y: [5, -5, 5],
+                rotate: [0, -2, 0],
+                opacity: [0.1, 0.35, 0.1],
+              }}
+              transition={{
+                duration: 3.5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 2,
+              }}
+            >
+              <Sparkles className="w-2 h-2" />
+            </motion.div>
+          </>
+        )}
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -70,18 +150,57 @@ export function ContactSection() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex justify-center items-center"
             >
-              <Button
-                size="lg"
-                onClick={() => {
-                  window.dispatchEvent(new Event("adpoint:bypass-hijack"))
-                  setIsSchedulingOpen(true)
-                  setIsFormOpen(true)
+              <motion.div
+                className="relative"
+                animate={isMobile ? {
+                  scale: [1, 1.02, 1],
+                } : {}}
+                transition={{
+                  duration: 3,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
                 }}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg md:text-xl px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow flex items-center gap-2 sm:gap-3 min-h-[44px] w-full sm:w-auto"
               >
-                <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
-                Schedule a Meeting
-              </Button>
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                    setIsSchedulingOpen(true)
+                    setIsFormOpen(true)
+                  }}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg md:text-xl px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow flex items-center gap-2 sm:gap-3 min-h-[44px] w-full sm:w-auto"
+                >
+                  <motion.div
+                    animate={isMobile ? {
+                      rotate: [0, 5, 0],
+                    } : {}}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </motion.div>
+                  <span>Schedule a Meeting</span>
+                </Button>
+                
+                {/* Mobile button glow effect */}
+                {isMobile && (
+                  <motion.div
+                    className="absolute inset-0 bg-primary/20 rounded-xl blur-xl -z-10"
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
+                  />
+                )}
+              </motion.div>
             </motion.div>
           </motion.div>
 
@@ -92,13 +211,87 @@ export function ContactSection() {
                 key={info.title}
                 animationType="fade-in"
                 staggerDelay={index * 0.1}
-                className="text-center p-6 sm:p-8 bg-card/50 border border-border/50 rounded-xl hover:border-primary/50 transition-all duration-300 hover-lift backdrop-blur-sm"
+                className="text-center p-6 sm:p-8 bg-card/50 border border-border/50 rounded-xl hover:border-primary/50 transition-all duration-300 hover-lift backdrop-blur-sm relative overflow-hidden"
               >
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                {/* Mobile floating elements for each card */}
+                {isMobile && (
+                  <>
+                    <motion.div
+                      className="absolute top-2 right-2 w-1 h-1 bg-primary/30 rounded-full"
+                      animate={{
+                        opacity: [0.3, 0.8, 0.3],
+                        scale: [0.8, 1.2, 0.8],
+                      }}
+                      transition={{
+                        duration: 2 + index * 0.3,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut",
+                        delay: index * 0.2,
+                      }}
+                    />
+                    <motion.div
+                      className="absolute bottom-2 left-2 w-1 h-1 bg-primary/20 rounded-full"
+                      animate={{
+                        opacity: [0.2, 0.6, 0.2],
+                        scale: [0.6, 1.4, 0.6],
+                      }}
+                      transition={{
+                        duration: 2.5 + index * 0.2,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut",
+                        delay: index * 0.4,
+                      }}
+                    />
+                  </>
+                )}
+
+                <motion.div 
+                  className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6 relative"
+                  animate={isMobile ? {
+                    scale: [1, 1.05, 1],
+                    rotate: [0, 2, 0],
+                  } : {}}
+                  transition={{
+                    duration: 3 + index * 0.2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                    delay: index * 0.3,
+                  }}
+                >
                   <info.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                </div>
-                <h3 className="font-semibold text-white text-lg sm:text-xl mb-2">{info.title}</h3>
-                <p className="text-primary font-medium text-base sm:text-lg mb-2">{info.details}</p>
+                </motion.div>
+                
+                <motion.h3 
+                  className="font-semibold text-white text-lg sm:text-xl mb-2"
+                  animate={isMobile ? {
+                    scale: [1, 1.02, 1],
+                  } : {}}
+                  transition={{
+                    duration: 2.5 + index * 0.1,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                    delay: index * 0.2,
+                  }}
+                >
+                  {info.title}
+                </motion.h3>
+                
+                <motion.p 
+                  className="text-primary font-medium text-base sm:text-lg mb-2"
+                  animate={isMobile ? {
+                    scale: [1, 1.01, 1],
+                    opacity: [0.9, 1, 0.9],
+                  } : {}}
+                  transition={{
+                    duration: 2.8 + index * 0.15,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                    delay: index * 0.25,
+                  }}
+                >
+                  {info.details}
+                </motion.p>
+                
                 <p className="text-xs sm:text-sm text-muted-foreground">{info.description}</p>
               </MobileScrollAnimation>
             ))}

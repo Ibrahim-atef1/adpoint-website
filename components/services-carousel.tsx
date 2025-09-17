@@ -3,7 +3,8 @@
 import React, { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { Palette, Globe, Megaphone, BarChart3, Camera, Code } from "lucide-react"
+import { Palette, Globe, Megaphone, BarChart3, Camera, Code, Sparkles, Zap } from "lucide-react"
+import { motion } from "framer-motion"
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
@@ -20,9 +21,17 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -40,6 +49,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       if (cardRef.current) {
         observer.unobserve(cardRef.current)
       }
+      window.removeEventListener('resize', checkMobile)
     }
   }, [])
 
@@ -47,7 +57,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
   const shouldShowDescription = typeof window !== 'undefined' && window.innerWidth < 768 ? isInView : isHovered
 
   return (
-    <div 
+    <motion.div 
       ref={cardRef}
       className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
@@ -58,6 +68,17 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
           : `0 0 15px ${color}20, 0 0 30px ${color}10`,
         willChange: 'transform, box-shadow',
         transform: 'translate3d(0, 0, 0)'
+      }}
+      // Mobile-specific animations
+      animate={isMobile && isInView ? {
+        scale: [1, 1.02, 1],
+        y: [0, -5, 0],
+      } : {}}
+      transition={{
+        duration: 3,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+        delay: Math.random() * 2, // Random delay for staggered effect
       }}
     >
       {/* Underglow effect */}
@@ -70,13 +91,62 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         }}
       />
 
+      {/* Mobile floating elements */}
+      {isMobile && isInView && (
+        <>
+          <motion.div
+            className="absolute top-4 right-4 text-primary/30"
+            animate={{
+              y: [-3, 3, -3],
+              rotate: [0, 5, 0],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 0.5,
+            }}
+          >
+            <Sparkles className="w-3 h-3" />
+          </motion.div>
+          <motion.div
+            className="absolute bottom-4 left-4 text-primary/30"
+            animate={{
+              y: [3, -3, 3],
+              rotate: [0, -3, 0],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          >
+            <Zap className="w-2 h-2" />
+          </motion.div>
+        </>
+      )}
+
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
-        <div 
+        <motion.div 
           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative"
           style={{
             background: `linear-gradient(135deg, ${color}30, ${color}50)`,
             boxShadow: `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
             transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
+          }}
+          // Enhanced mobile animations
+          animate={isMobile && isInView ? {
+            scale: [1, 1.05, 1],
+            rotate: [0, 2, 0],
+          } : {}}
+          transition={{
+            duration: 2.5,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 0.3,
           }}
         >
           {/* Animated background ring */}
@@ -115,9 +185,20 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
           </div>
         </div>
         
-        <h3 className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4 float">
+        <motion.h3 
+          className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4"
+          animate={isMobile && isInView ? {
+            scale: [1, 1.02, 1],
+          } : {}}
+          transition={{
+            duration: 2,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 0.5,
+          }}
+        >
           {title}
-        </h3>
+        </motion.h3>
 
         {/* Hover Description */}
         <div className={`transition-all duration-1000 ${shouldShowDescription ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
@@ -219,11 +300,47 @@ export function ServicesCarousel() {
 
   return (
     <section ref={sectionRef} className="relative w-full min-h-screen bg-black">
+      {/* Mobile floating background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/20 rounded-full md:hidden"
+            style={{
+              left: `${10 + i * 15}%`,
+              top: `${20 + (i % 3) * 25}%`,
+            }}
+            animate={{
+              y: [-20, 20, -20],
+              x: [-10, 10, -10],
+              opacity: [0.1, 0.4, 0.1],
+              scale: [0.5, 1.5, 0.5],
+            }}
+            transition={{
+              duration: 8 + i * 0.5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: i * 0.8,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
       <div className="absolute top-8 left-0 right-0 z-20 px-4">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white text-center font-display">
+        <motion.h2 
+          className="text-3xl sm:text-4xl font-bold text-white text-center font-display"
+          animate={{
+            scale: [1, 1.02, 1],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
+        >
           Our Services
-        </h2>
+        </motion.h2>
       </div>
 
       {/* Cards Container */}

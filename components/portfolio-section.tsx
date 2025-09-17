@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { motion } from "framer-motion"
+import { Sparkles, Zap, Star } from "lucide-react"
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
@@ -19,9 +21,17 @@ interface ProjectCardProps {
 const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, description }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -39,6 +49,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
       if (cardRef.current) {
         observer.unobserve(cardRef.current)
       }
+      window.removeEventListener('resize', checkMobile)
     }
   }, [])
 
@@ -46,7 +57,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
   const shouldShowDescription = typeof window !== 'undefined' && window.innerWidth < 768 ? isInView : isHovered
 
   return (
-    <div 
+    <motion.div 
       ref={cardRef}
       className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
@@ -57,6 +68,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
           : '0 0 15px rgba(185, 28, 28, 0.2), 0 0 30px rgba(185, 28, 28, 0.1)',
         willChange: 'transform, box-shadow',
         transform: 'translate3d(0, 0, 0)'
+      }}
+      // Mobile-specific animations
+      animate={isMobile && isInView ? {
+        scale: [1, 1.02, 1],
+        y: [0, -8, 0],
+      } : {}}
+      transition={{
+        duration: 3.5,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+        delay: Math.random() * 2.5, // Random delay for staggered effect
       }}
     >
       {/* Underglow effect */}
@@ -69,12 +91,80 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
         }}
       />
 
+      {/* Mobile floating elements */}
+      {isMobile && isInView && (
+        <>
+          <motion.div
+            className="absolute top-4 right-4 text-primary/30"
+            animate={{
+              y: [-4, 4, -4],
+              rotate: [0, 8, 0],
+              opacity: [0.3, 0.7, 0.3],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 0.3,
+            }}
+          >
+            <Star className="w-3 h-3" />
+          </motion.div>
+          <motion.div
+            className="absolute bottom-4 left-4 text-primary/30"
+            animate={{
+              y: [4, -4, 4],
+              rotate: [0, -5, 0],
+              opacity: [0.2, 0.6, 0.2],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 0.8,
+            }}
+          >
+            <Sparkles className="w-2 h-2" />
+          </motion.div>
+          <motion.div
+            className="absolute top-1/2 left-2 text-primary/20"
+            animate={{
+              x: [-2, 2, -2],
+              y: [-2, 2, -2],
+              opacity: [0.1, 0.4, 0.1],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 1.2,
+            }}
+          >
+            <Zap className="w-1.5 h-1.5" />
+          </motion.div>
+        </>
+      )}
+
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
-        <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-red-600 rounded-full flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative ${isHovered ? 'scale-110' : 'scale-100'}`} style={{ 
-          boxShadow: `0 0 25px rgba(185, 28, 28, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)`,
-          transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
-        }}>
+        <motion.div 
+          className={`w-16 h-16 sm:w-20 sm:h-20 bg-red-600 rounded-full flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative ${isHovered ? 'scale-110' : 'scale-100'}`} 
+          style={{ 
+            boxShadow: `0 0 25px rgba(185, 28, 28, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)`,
+            transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
+          }}
+          // Enhanced mobile animations
+          animate={isMobile && isInView ? {
+            scale: [1, 1.08, 1],
+            rotate: [0, 3, 0],
+          } : {}}
+          transition={{
+            duration: 2.8,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 0.4,
+          }}
+        >
           {/* Animated background ring */}
           <div 
             className="absolute inset-0 rounded-full opacity-0 transition-all duration-1000"
@@ -115,13 +205,36 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
           {category}
         </div>
         
-        <h3 className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4 float">
+        <motion.h3 
+          className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4"
+          animate={isMobile && isInView ? {
+            scale: [1, 1.03, 1],
+          } : {}}
+          transition={{
+            duration: 2.2,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 0.6,
+          }}
+        >
           {title}
-        </h3>
+        </motion.h3>
         
-        <div className="bg-red-600/20 text-red-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-3 sm:mb-4 backdrop-blur-sm border border-red-400/20">
+        <motion.div 
+          className="bg-red-600/20 text-red-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-3 sm:mb-4 backdrop-blur-sm border border-red-400/20"
+          animate={isMobile && isInView ? {
+            scale: [1, 1.05, 1],
+            opacity: [0.8, 1, 0.8],
+          } : {}}
+          transition={{
+            duration: 2.5,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 0.8,
+          }}
+        >
           {results}
-        </div>
+        </motion.div>
 
         {/* Hover Description */}
         <div className={`transition-all duration-1000 ${shouldShowDescription ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
@@ -223,11 +336,47 @@ export function PortfolioSection() {
 
   return (
     <section ref={sectionRef} className="relative w-full min-h-screen bg-black">
+      {/* Mobile floating background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/15 rounded-full md:hidden"
+            style={{
+              left: `${5 + i * 12}%`,
+              top: `${15 + (i % 4) * 20}%`,
+            }}
+            animate={{
+              y: [-25, 25, -25],
+              x: [-15, 15, -15],
+              opacity: [0.1, 0.5, 0.1],
+              scale: [0.3, 1.8, 0.3],
+            }}
+            transition={{
+              duration: 10 + i * 0.3,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: i * 0.6,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
       <div className="absolute top-8 left-0 right-0 z-20 px-4">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white text-center font-display">
+        <motion.h2 
+          className="text-3xl sm:text-4xl font-bold text-white text-center font-display"
+          animate={{
+            scale: [1, 1.03, 1],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
+        >
           Our Work
-        </h2>
+        </motion.h2>
       </div>
 
       {/* Cards Container */}

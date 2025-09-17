@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { useForm } from "@/contexts/FormContext"
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { setIsNavigating } = useForm()
 
   useEffect(() => {
     let ticking = false
@@ -26,7 +28,21 @@ export function Navigation() {
   }, [])
 
   const scrollToSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
+    if (sectionId === "contact") {
+      // Scroll to a position above the contact section to avoid triggering footer
+      const contactElement = document.getElementById(sectionId)
+      if (contactElement) {
+        const rect = contactElement.getBoundingClientRect()
+        const scrollTop = window.pageYOffset + rect.top - 200 // 200px above contact section
+        
+        window.scrollTo({
+          top: scrollTop,
+          behavior: "smooth"
+        })
+      }
+    } else {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
+    }
     setIsMobileMenuOpen(false)
   }
 

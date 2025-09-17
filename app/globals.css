@@ -736,6 +736,113 @@
     .mobile-stagger-4 { transition-delay: 0.4s; }
     .mobile-stagger-5 { transition-delay: 0.5s; }
     
+    /* Enhanced mobile button animations */
+    .mobile-button-glow {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mobile-button-glow::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(185, 28, 28, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    .mobile-button-glow:hover::before {
+      left: 100%;
+    }
+    
+    /* Mobile floating elements */
+    .mobile-float {
+      animation: mobile-float 4s ease-in-out infinite;
+    }
+    
+    @keyframes mobile-float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-8px) rotate(1deg); }
+      50% { transform: translateY(-12px) rotate(0deg); }
+      75% { transform: translateY(-8px) rotate(-1deg); }
+    }
+    
+    /* Mobile pulse effects */
+    .mobile-pulse {
+      animation: mobile-pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes mobile-pulse {
+      0%, 100% { 
+        transform: scale(1);
+        opacity: 0.8;
+      }
+      50% { 
+        transform: scale(1.05);
+        opacity: 1;
+      }
+    }
+    
+    /* Mobile shimmer effect */
+    .mobile-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mobile-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: mobile-shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes mobile-shimmer {
+      0% { left: -100%; }
+      50% { left: 100%; }
+      100% { left: 100%; }
+    }
+    
+    /* Mobile bounce effect */
+    .mobile-bounce {
+      animation: mobile-bounce 2s ease-in-out infinite;
+    }
+    
+    @keyframes mobile-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    /* Mobile wiggle effect */
+    .mobile-wiggle {
+      animation: mobile-wiggle 3s ease-in-out infinite;
+    }
+    
+    @keyframes mobile-wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(2deg); }
+      75% { transform: rotate(-2deg); }
+    }
+    
+    /* Mobile glow effect */
+    .mobile-glow {
+      animation: mobile-glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes mobile-glow {
+      0%, 100% { 
+        box-shadow: 0 0 10px rgba(185, 28, 28, 0.3);
+      }
+      50% { 
+        box-shadow: 0 0 20px rgba(185, 28, 28, 0.6), 0 0 30px rgba(185, 28, 28, 0.3);
+      }
+    }
+    
     /* Mobile performance optimizations */
     * {
       -webkit-tap-highlight-color: transparent;
@@ -766,7 +873,12 @@
       .mobile-fade-in,
       .mobile-slide-in-left,
       .mobile-slide-in-right,
-      .mobile-scale-in {
+      .mobile-scale-in,
+      .mobile-float,
+      .mobile-pulse,
+      .mobile-bounce,
+      .mobile-wiggle,
+      .mobile-glow {
         transition: none !important;
         animation: none !important;
       }

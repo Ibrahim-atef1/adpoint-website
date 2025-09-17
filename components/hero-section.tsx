@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useScroll, useTransform } from "framer-motion"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Sparkles, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRef, useEffect, useState } from "react"
 import { useForm } from "@/contexts/FormContext"
@@ -10,6 +10,7 @@ export function HeroSection() {
   const ref = useRef(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hasScrolled, setHasScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const { setIsNavigating } = useForm()
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -20,6 +21,13 @@ export function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
     const handleMouseMove = (e: MouseEvent) => {
       const rect = ref.current?.getBoundingClientRect()
       if (rect) {
@@ -43,6 +51,7 @@ export function HeroSection() {
       if (heroElement) {
         heroElement.removeEventListener("mousemove", handleMouseMove)
       }
+      window.removeEventListener('resize', checkMobile)
     }
   }, [])
 
@@ -88,10 +97,11 @@ export function HeroSection() {
       />
 
       <div className="absolute inset-0">
+        {/* Desktop particles */}
         {[...Array(2)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-primary/10 rounded-full"
+            className="absolute w-1 h-1 bg-primary/10 rounded-full hidden md:block"
             style={{
               left: `${30 + i * 40}%`,
               top: `${40 + i * 20}%`,
@@ -108,6 +118,84 @@ export function HeroSection() {
             }}
           />
         ))}
+        
+        {/* Mobile enhanced particles */}
+        {isMobile && [...Array(8)].map((_, i) => (
+          <motion.div
+            key={`mobile-${i}`}
+            className="absolute w-1 h-1 bg-primary/20 rounded-full md:hidden"
+            style={{
+              left: `${10 + i * 12}%`,
+              top: `${20 + (i % 3) * 25}%`,
+            }}
+            animate={{
+              y: [-15, 15, -15],
+              x: [-5, 5, -5],
+              opacity: [0.1, 0.4, 0.1],
+              scale: [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: 6 + i * 0.5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: i * 0.3,
+            }}
+          />
+        ))}
+        
+        {/* Mobile floating icons */}
+        {isMobile && (
+          <>
+            <motion.div
+              className="absolute top-20 left-8 text-primary/30 md:hidden"
+              animate={{
+                y: [-10, 10, -10],
+                rotate: [0, 5, 0],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+            >
+              <Sparkles className="w-6 h-6" />
+            </motion.div>
+            <motion.div
+              className="absolute top-32 right-12 text-primary/30 md:hidden"
+              animate={{
+                y: [10, -10, 10],
+                rotate: [0, -5, 0],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            >
+              <Zap className="w-5 h-5" />
+            </motion.div>
+            <motion.div
+              className="absolute bottom-40 left-12 text-primary/30 md:hidden"
+              animate={{
+                y: [-8, 8, -8],
+                rotate: [0, 3, 0],
+                opacity: [0.2, 0.5, 0.2],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+            >
+              <Sparkles className="w-4 h-4" />
+            </motion.div>
+          </>
+        )}
       </div>
 
       {/* Content */}
@@ -170,22 +258,78 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 1.2, ease: "easeOut" }}
             className="pt-4"
           >
-            <Button
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow min-h-[44px] w-full sm:w-auto"
-              onClick={() => {
-                window.dispatchEvent(new Event("adpoint:bypass-hijack"))
-                // Temporarily disable footer to prevent triggering during scroll
-                setIsNavigating(true)
-                document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
-                // Re-enable footer after scroll completes
-                setTimeout(() => {
-                  setIsNavigating(false)
-                }, 1000)
-              }}
+            <motion.div
+              className="relative"
+              whileHover={isMobile ? {} : { scale: 1.05 }}
+              whileTap={isMobile ? { scale: 0.95 } : {}}
             >
-              Start Your Project
-            </Button>
+              <Button
+                size="lg"
+                className={`bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow min-h-[44px] w-full sm:w-auto ${
+                  isMobile ? 'mobile-button-glow' : ''
+                }`}
+                onClick={() => {
+                  window.dispatchEvent(new Event("adpoint:bypass-hijack"))
+                  
+                  // Scroll to a position above the contact section to avoid triggering footer
+                  const contactElement = document.getElementById("contact")
+                  if (contactElement) {
+                    const rect = contactElement.getBoundingClientRect()
+                    const scrollTop = window.pageYOffset + rect.top - 200 // 200px above contact section
+                    
+                    window.scrollTo({
+                      top: scrollTop,
+                      behavior: "smooth"
+                    })
+                  }
+                }}
+              >
+                <motion.span
+                  className="flex items-center space-x-2"
+                  animate={isMobile ? {
+                    scale: [1, 1.02, 1],
+                  } : {}}
+                  transition={{
+                    duration: 2,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <span>Start Your Project</span>
+                  {isMobile && (
+                    <motion.div
+                      animate={{
+                        x: [0, 3, 0],
+                        opacity: [0.7, 1, 0.7],
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+                    </motion.div>
+                  )}
+                </motion.span>
+              </Button>
+              
+              {/* Mobile button glow effect */}
+              {isMobile && (
+                <motion.div
+                  className="absolute inset-0 bg-primary/20 rounded-xl blur-xl -z-10"
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut"
+                  }}
+                />
+              )}
+            </motion.div>
           </motion.div>
         </motion.div>
       </motion.div>
