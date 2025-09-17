@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { useForm } from "@/contexts/FormContext"
+import { Instagram } from "lucide-react"
 
 export function WorkingCinematicFooter() {
   const footerRef = useRef<HTMLElement>(null)
@@ -221,7 +222,7 @@ export function WorkingCinematicFooter() {
                 >
                   <div className="space-y-4 lg:space-y-6">
                     <motion.div 
-                      className="flex items-center space-x-4"
+                      className="flex items-center space-x-4 hidden sm:flex"
                       initial={{ opacity: 0, x: 15 }}
                       animate={{ 
                         opacity: scrollProgress > 0.22 ? 1 : 0,
@@ -229,8 +230,15 @@ export function WorkingCinematicFooter() {
                       }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
                     >
-                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                      <span className="text-red-200 text-base lg:text-lg">hello@adpoint.com</span>
+                      <a 
+                        href="https://instagram.com/adpoint.agency" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200"
+                      >
+                        <Instagram className="w-5 h-5 text-red-400" />
+                        <span className="text-red-200 text-base lg:text-lg">@adpoint.agency</span>
+                      </a>
                     </motion.div>
                     
                     <motion.div 

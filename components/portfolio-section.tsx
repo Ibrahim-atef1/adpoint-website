@@ -155,11 +155,6 @@ export function PortfolioSection() {
     const totalCards = 6
     const totalScrollDistance = (totalCards - 1) * cardWidth
 
-    // Create progress bar
-    const progressBar = document.createElement('div')
-    progressBar.className = 'fixed top-0 left-0 w-full h-1 bg-gray-800 z-50'
-    progressBar.innerHTML = '<div class="h-full bg-red-600 transition-all duration-300 ease-out" style="width: 0%"></div>'
-    document.body.appendChild(progressBar)
 
     const ctx = gsap.context(() => {
       // Center the first card by offsetting the container
@@ -178,22 +173,12 @@ export function PortfolioSection() {
           scrub: 1,
           start: "top top",
           end: () => `+=${scrollDistance}`,
-          onUpdate: (self) => {
-            const progress = (self.progress * 100).toFixed(1)
-            const progressFill = progressBar.querySelector('div') as HTMLElement
-            if (progressFill) {
-              progressFill.style.width = `${progress}%`
-            }
-          }
         },
       })
     }, sectionRef)
 
     return () => {
       ctx.revert()
-      if (progressBar.parentNode) {
-        progressBar.parentNode.removeChild(progressBar)
-      }
     }
   }, [])
 

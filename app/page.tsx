@@ -8,9 +8,6 @@ const Navigation = dynamicImport(() => import("@/components/navigation").then(m 
   ssr: false,
   loading: () => <div className="h-16" />
 })
-const ScrollProgress = dynamicImport(() => import("@/components/scroll-progress").then(m => m.ScrollProgress), { 
-  ssr: false 
-})
 const HeroSection = dynamicImport(() => import("@/components/hero-section").then(m => m.HeroSection), { 
   ssr: false,
   loading: () => <div className="min-h-screen bg-background" />
@@ -46,7 +43,6 @@ export default function HomePage() {
       <FormProvider>
         <main className="min-h-screen bg-background text-foreground">
           <Navigation />
-          <ScrollProgress />
 
           <div id="hero">
             <HeroSection />
