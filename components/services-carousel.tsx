@@ -19,14 +19,41 @@ interface ServiceCardProps {
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description }) => {
   const [isHovered, setIsHovered] = useState(false)
+  const [isInView, setIsInView] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true)
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current)
+    }
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current)
+      }
+    }
+  }, [])
+
+  // On mobile, show description when in view. On desktop, show on hover
+  const shouldShowDescription = typeof window !== 'undefined' && window.innerWidth < 768 ? isInView : isHovered
 
   return (
     <div 
+      ref={cardRef}
       className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        boxShadow: isHovered 
+        boxShadow: shouldShowDescription 
           ? `0 0 30px ${color}40, 0 0 60px ${color}20, 0 0 90px ${color}10` 
           : `0 0 15px ${color}20, 0 0 30px ${color}10`,
         willChange: 'transform, box-shadow',
@@ -93,7 +120,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         </h3>
 
         {/* Hover Description */}
-        <div className={`transition-all duration-1000 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <div className={`transition-all duration-1000 ${shouldShowDescription ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <div className="bg-black/60 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/10">
             <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-sm">
               {description}

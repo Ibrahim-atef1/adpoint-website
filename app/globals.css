@@ -148,6 +148,18 @@
     scroll-behavior: smooth;
     /* Enhanced smooth scrolling for ultra-smooth experience */
     scroll-padding-top: 2rem;
+    /* Ensure page loads from top */
+    scroll-behavior: auto;
+  }
+  
+  /* Reset scroll position on page load */
+  html, body {
+    scroll-behavior: auto;
+  }
+  
+  /* Force scroll to top on page load */
+  body {
+    scroll-behavior: auto;
   }
   
   /* Ultra-smooth scrolling for all elements */

@@ -61,8 +61,6 @@ export function ContactSection() {
                 </span>
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
               </div>
-              
-              <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto" />
             </div>
 
             <motion.div

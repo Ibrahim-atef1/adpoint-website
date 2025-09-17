@@ -81,7 +81,7 @@ export function WorkingCinematicFooter() {
         >
           {/* Content Container */}
           <motion.div 
-            className="h-full flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 md:p-8 lg:p-16"
+            className="h-full flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 lg:p-16 space-y-8 sm:space-y-12 lg:space-y-0"
             initial={{ opacity: 0, y: 30 }}
             animate={{ 
               opacity: scrollProgress > 0.05 ? 1 : 0,
@@ -91,7 +91,7 @@ export function WorkingCinematicFooter() {
           >
             {/* Left Side - Logo & Branding */}
             <motion.div 
-              className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left mb-6 sm:mb-8 lg:mb-0"
+              className="w-full lg:flex-1 flex flex-col items-center text-center lg:text-left"
               initial={{ x: -50, opacity: 0 }}
               animate={{ 
                 x: scrollProgress > 0.1 ? 0 : -20,
@@ -118,7 +118,7 @@ export function WorkingCinematicFooter() {
 
             {/* Right Side - Navigation & Contact */}
             <motion.div 
-              className="flex-1 flex flex-col items-center lg:items-start"
+              className="w-full lg:flex-1 flex flex-col items-center lg:items-start"
               initial={{ x: 50, opacity: 0 }}
               animate={{ 
                 x: scrollProgress > 0.15 ? 0 : 20,
@@ -126,9 +126,9 @@ export function WorkingCinematicFooter() {
               }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <div className="space-y-6 sm:space-y-8">
+              <div className="w-full space-y-6 sm:space-y-8">
                 {/* Navigation Links */}
-                <nav className="space-y-4 sm:space-y-6">
+                <nav className="w-full space-y-4 sm:space-y-6">
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ 
@@ -212,7 +212,7 @@ export function WorkingCinematicFooter() {
 
                 {/* Contact Info */}
                 <motion.div 
-                  className="pt-8 border-t border-red-300/20"
+                  className="w-full pt-6 sm:pt-8 border-t border-red-300/20"
                   initial={{ opacity: 0, y: 25 }}
                   animate={{ 
                     opacity: scrollProgress > 0.2 ? 1 : 0,
@@ -265,7 +265,7 @@ export function WorkingCinematicFooter() {
                 {/* Back to Top Button */}
                 <motion.button
                   onClick={scrollToTop}
-                  className="mt-6 sm:mt-10 px-6 sm:px-10 py-3 sm:py-4 bg-red-600 text-red-50 rounded-full font-medium hover:bg-red-500 transition-colors duration-500 text-base sm:text-lg min-h-[44px] w-full sm:w-auto"
+                  className="mt-6 sm:mt-10 px-6 sm:px-10 py-3 sm:py-4 bg-red-600 text-red-50 rounded-full font-medium hover:bg-red-500 transition-colors duration-500 text-base sm:text-lg min-h-[44px] w-full max-w-xs mx-auto"
                   initial={{ opacity: 0, y: 25 }}
                   animate={{ 
                     opacity: scrollProgress > 0.28 ? 1 : 0,

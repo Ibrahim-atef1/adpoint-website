@@ -38,6 +38,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${poppins.variable} ${montserrat.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Ensure page loads from top
+              window.addEventListener('load', function() {
+                window.scrollTo(0, 0);
+              });
+              // Also scroll to top on page show (back button, etc.)
+              window.addEventListener('pageshow', function() {
+                window.scrollTo(0, 0);
+              });
+            `,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased relative mobile-optimized">
         <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black opacity-60" />
