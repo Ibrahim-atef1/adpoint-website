@@ -449,6 +449,19 @@
     .horizontal-scroll-track > * {
       scroll-snap-align: none; /* Disable snapping on mobile */
     }
+    
+    /* Mobile-specific optimizations */
+    .mobile-optimized {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    
+    /* Reduce motion on mobile for better performance */
+    .reduce-motion {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   /* Enhanced scroll freeze behavior */
@@ -571,6 +584,17 @@
     .parallax-mobile {
       transform: none !important;
     }
+    
+    /* Mobile typography scaling */
+    .mobile-text-scale {
+      font-size: clamp(0.875rem, 2.5vw, 1rem);
+    }
+    
+    /* Mobile spacing adjustments */
+    .mobile-spacing {
+      padding: 1rem;
+      margin: 0.5rem;
+    }
   }
 
   @media (max-width: 480px) {
@@ -586,6 +610,12 @@
     .button-glow:hover::before {
       left: -100%;
     }
+    
+    /* Extra small mobile optimizations */
+    .xs-mobile {
+      font-size: 0.75rem;
+      padding: 0.5rem;
+    }
   }
 
   /* Touch device optimizations */
@@ -596,6 +626,36 @@
     
     .button-glow:hover::before {
       left: -100%;
+    }
+    
+    /* Ensure touch targets are large enough */
+    button, a, input, select, textarea {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Mobile performance optimizations */
+  @media (max-width: 768px) {
+    /* Reduce complex animations on mobile */
+    .animate-gradient {
+      animation: none;
+    }
+    
+    .animate-float {
+      animation: none;
+    }
+    
+    /* Optimize transforms for mobile */
+    .gpu-accelerated {
+      transform: translateZ(0);
+      will-change: auto;
+    }
+    
+    /* Improve scrolling performance */
+    .smooth-scroll {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
   }
 

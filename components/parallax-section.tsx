@@ -15,10 +15,13 @@ export function ParallaxSection({ children, offset = 50 }: ParallaxSectionProps)
     offset: ["start end", "end start"],
   })
 
-  const y = useTransform(scrollYProgress, [0, 1], [offset, -offset])
+  // Reduce parallax effect on mobile for better performance
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const adjustedOffset = isMobile ? offset * 0.3 : offset
+  const y = useTransform(scrollYProgress, [0, 1], [adjustedOffset, -adjustedOffset])
 
   return (
-    <motion.div ref={ref} style={{ y }}>
+    <motion.div ref={ref} style={{ y }} className={isMobile ? 'parallax-mobile' : ''}>
       {children}
     </motion.div>
   )

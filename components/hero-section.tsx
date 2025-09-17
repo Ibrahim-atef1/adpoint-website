@@ -116,10 +116,10 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={hasScrolled ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.9 }}
           transition={{ duration: 0.9, ease: "easeOut", delay: 0.4 }}
-          className="space-y-8"
+          className="space-y-6 sm:space-y-8"
         >
           <motion.h1
-            className="font-display font-bold text-6xl sm:text-7xl lg:text-9xl text-balance leading-tight"
+            className="font-display font-bold text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-balance leading-tight"
             style={{
               transform: `translate(${mousePosition.x * 0.1}px, ${mousePosition.y * 0.1}px)`,
             }}
@@ -145,20 +145,20 @@ export function HeroSection() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={hasScrolled ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
-              className="flex justify-center items-center space-x-4"
+              className="flex justify-center items-center space-x-2 sm:space-x-4"
             >
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              <span className="text-2xl sm:text-3xl text-primary font-semibold tracking-wide">
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
+              <span className="text-lg sm:text-2xl md:text-3xl text-primary font-semibold tracking-wide">
                 DIGITAL EXCELLENCE
               </span>
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
             </motion.div>
             
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={hasScrolled ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.8, delay: 1.0, ease: "easeOut" }}
-              className="text-lg sm:text-xl text-muted-foreground font-light tracking-wider"
+              className="text-base sm:text-lg md:text-xl text-muted-foreground font-light tracking-wider"
             >
               DELIVERED
             </motion.p>
@@ -172,7 +172,7 @@ export function HeroSection() {
           >
             <Button
               size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow min-h-[44px] w-full sm:w-auto"
               onClick={() => {
                 window.dispatchEvent(new Event("adpoint:bypass-hijack"))
                 // Temporarily disable footer to prevent triggering during scroll

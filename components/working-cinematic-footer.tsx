@@ -81,7 +81,7 @@ export function WorkingCinematicFooter() {
         >
           {/* Content Container */}
           <motion.div 
-            className="h-full flex flex-col lg:flex-row items-center justify-center p-8 lg:p-16"
+            className="h-full flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 md:p-8 lg:p-16"
             initial={{ opacity: 0, y: 30 }}
             animate={{ 
               opacity: scrollProgress > 0.05 ? 1 : 0,
@@ -91,7 +91,7 @@ export function WorkingCinematicFooter() {
           >
             {/* Left Side - Logo & Branding */}
             <motion.div 
-              className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left mb-8 lg:mb-0"
+              className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left mb-6 sm:mb-8 lg:mb-0"
               initial={{ x: -50, opacity: 0 }}
               animate={{ 
                 x: scrollProgress > 0.1 ? 0 : -20,
@@ -105,12 +105,12 @@ export function WorkingCinematicFooter() {
                   alt="AdPoint Logo"
                   width={600}
                   height={240}
-                  className="h-32 lg:h-40 w-auto mx-auto lg:mx-0 mb-8"
+                  className="h-24 sm:h-32 lg:h-40 w-auto mx-auto lg:mx-0 mb-6 sm:mb-8"
                 />
-                <h2 className="text-3xl lg:text-4xl font-bold text-red-100 mb-6 leading-tight">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-100 mb-4 sm:mb-6 leading-tight">
                   Let's Create Something Amazing
                 </h2>
-                <p className="text-red-200 text-lg leading-relaxed">
+                <p className="text-red-200 text-base sm:text-lg leading-relaxed">
                   Transform your vision into extraordinary digital experiences that captivate and inspire your audience.
                 </p>
               </div>
@@ -126,9 +126,9 @@ export function WorkingCinematicFooter() {
               }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8">
                 {/* Navigation Links */}
-                <nav className="space-y-6">
+                <nav className="space-y-4 sm:space-y-6">
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ 
@@ -139,7 +139,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("hero")}
-                      className="block text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500"
+                      className="block text-lg sm:text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500 min-h-[44px] flex items-center"
                     >
                       Home
                     </button>
@@ -155,7 +155,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("about")}
-                      className="block text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500"
+                      className="block text-lg sm:text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500 min-h-[44px] flex items-center"
                     >
                       About Us
                     </button>
@@ -171,7 +171,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("services")}
-                      className="block text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500"
+                      className="block text-lg sm:text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500 min-h-[44px] flex items-center"
                     >
                       Services
                     </button>
@@ -187,7 +187,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("portfolio")}
-                      className="block text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500"
+                      className="block text-lg sm:text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500 min-h-[44px] flex items-center"
                     >
                       Portfolio
                     </button>
@@ -203,7 +203,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("contact")}
-                      className="block text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500"
+                      className="block text-lg sm:text-xl lg:text-2xl font-medium text-red-100 hover:text-red-300 transition-colors duration-500 min-h-[44px] flex items-center"
                     >
                       Work With Us
                     </button>
@@ -265,7 +265,7 @@ export function WorkingCinematicFooter() {
                 {/* Back to Top Button */}
                 <motion.button
                   onClick={scrollToTop}
-                  className="mt-10 px-10 py-4 bg-red-600 text-red-50 rounded-full font-medium hover:bg-red-500 transition-colors duration-500 text-lg"
+                  className="mt-6 sm:mt-10 px-6 sm:px-10 py-3 sm:py-4 bg-red-600 text-red-50 rounded-full font-medium hover:bg-red-500 transition-colors duration-500 text-base sm:text-lg min-h-[44px] w-full sm:w-auto"
                   initial={{ opacity: 0, y: 25 }}
                   animate={{ 
                     opacity: scrollProgress > 0.28 ? 1 : 0,

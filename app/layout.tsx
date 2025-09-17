@@ -26,6 +26,8 @@ export const metadata: Metadata = {
   title: "AdPoint — Creative Marketing Agency",
   description: "Premium digital marketing agency specializing in creative campaigns, branding, and web development.",
   generator: "v0.app",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+  themeColor: "#ef4444",
 }
 
 
@@ -36,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${poppins.variable} ${montserrat.variable}`}>
-      <body className="font-sans antialiased relative">
+      <body className="font-sans antialiased relative mobile-optimized">
         <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black opacity-60" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(185,28,28,0.08),transparent_50%)]" />

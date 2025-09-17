@@ -25,7 +25,7 @@ export function ClientShowcase() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
   return (
-    <section className="py-32 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+    <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-32 h-32 bg-red-600/10 rounded-full blur-3xl" />
@@ -38,22 +38,22 @@ export function ClientShowcase() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <div className="text-center mb-16">
-            <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-8 text-balance">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 sm:mb-8 text-balance">
               Trusted by
               <span className="gradient-red"> Leaders</span>
             </h2>
             
-            <div className="space-y-6">
-              <div className="flex justify-center items-center space-x-4">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                <span className="text-2xl text-primary font-semibold tracking-wide">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex justify-center items-center space-x-2 sm:space-x-4">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
+                <span className="text-lg sm:text-xl md:text-2xl text-primary font-semibold tracking-wide">
                   BRANDS THAT SHAPE THE FUTURE
                 </span>
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
               </div>
               
-              <div className="w-32 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto" />
+              <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto" />
             </div>
           </div>
         </motion.div>
@@ -61,7 +61,7 @@ export function ClientShowcase() {
         {/* Client Logos Carousel */}
         <div ref={ref} className="relative overflow-hidden">
           <motion.div
-            className="flex space-x-12 items-center"
+            className="flex space-x-6 sm:space-x-8 md:space-x-12 items-center"
             animate={isInView ? { x: [0, -1920] } : {}}
             transition={{
               duration: 25,
@@ -79,14 +79,14 @@ export function ClientShowcase() {
                 whileHover={{ scale: 1.1, y: -10 }}
                 className="flex-shrink-0 group cursor-pointer"
               >
-                <div className="bg-gray-900/50 hover:bg-gray-800/80 border border-gray-800 hover:border-red-600/50 rounded-2xl p-8 transition-all duration-300 min-w-[200px] text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-red-700 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-white font-bold text-xl">{client.logo}</span>
+                <div className="bg-gray-900/50 hover:bg-gray-800/80 border border-gray-800 hover:border-red-600/50 rounded-2xl p-4 sm:p-6 md:p-8 transition-all duration-300 min-w-[150px] sm:min-w-[180px] md:min-w-[200px] text-center">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r from-red-600 to-red-700 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-white font-bold text-sm sm:text-base md:text-xl">{client.logo}</span>
                   </div>
-                  <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-red-400 transition-colors">
+                  <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-1 sm:mb-2 group-hover:text-red-400 transition-colors">
                     {client.name}
                   </h3>
-                  <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">
+                  <p className="text-gray-400 text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
                     {client.category}
                   </p>
                 </div>
@@ -100,14 +100,14 @@ export function ClientShowcase() {
                 whileHover={{ scale: 1.1, y: -10 }}
                 className="flex-shrink-0 group cursor-pointer"
               >
-                <div className="bg-gray-900/50 hover:bg-gray-800/80 border border-gray-800 hover:border-red-600/50 rounded-2xl p-8 transition-all duration-300 min-w-[200px] text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-red-600 to-red-700 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-white font-bold text-xl">{client.logo}</span>
+                <div className="bg-gray-900/50 hover:bg-gray-800/80 border border-gray-800 hover:border-red-600/50 rounded-2xl p-4 sm:p-6 md:p-8 transition-all duration-300 min-w-[150px] sm:min-w-[180px] md:min-w-[200px] text-center">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r from-red-600 to-red-700 rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-white font-bold text-sm sm:text-base md:text-xl">{client.logo}</span>
                   </div>
-                  <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-red-400 transition-colors">
+                  <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-1 sm:mb-2 group-hover:text-red-400 transition-colors">
                     {client.name}
                   </h3>
-                  <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">
+                  <p className="text-gray-400 text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
                     {client.category}
                   </p>
                 </div>
@@ -122,7 +122,7 @@ export function ClientShowcase() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mt-12 sm:mt-16 md:mt-20">
             {[
               { number: "500+", label: "Projects Delivered" },
               { number: "200+", label: "Happy Clients" },
@@ -136,11 +136,11 @@ export function ClientShowcase() {
                 transition={{ delay: 0.5 + index * 0.1 }}
                 className="text-center group"
               >
-                <div className="bg-gray-900/30 hover:bg-gray-800/50 border border-gray-800 hover:border-red-600/30 rounded-xl p-6 transition-all duration-300 group-hover:scale-105">
-                  <div className="text-3xl sm:text-4xl font-bold text-white mb-2 group-hover:text-red-400 transition-colors">
+                <div className="bg-gray-900/30 hover:bg-gray-800/50 border border-gray-800 hover:border-red-600/30 rounded-xl p-4 sm:p-6 transition-all duration-300 group-hover:scale-105">
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 group-hover:text-red-400 transition-colors">
                     {stat.number}
                   </div>
-                  <div className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">
+                  <div className="text-gray-400 text-xs sm:text-sm group-hover:text-gray-300 transition-colors">
                     {stat.label}
                   </div>
                 </div>

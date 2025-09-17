@@ -40,29 +40,29 @@ export function ContactSection() {
 
   return (
     <>
-      <section id="contact" className="py-24 px-4 sm:px-6 lg:px-8 bg-background noise-overlay">
+      <section id="contact" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-background noise-overlay">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-8 text-balance">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 sm:mb-8 text-balance">
               Ready to
               <span className="gradient-red"> Transform?</span>
             </h2>
             
-            <div className="space-y-6">
-              <div className="flex justify-center items-center space-x-4">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                <span className="text-2xl text-primary font-semibold tracking-wide">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex justify-center items-center space-x-2 sm:space-x-4">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
+                <span className="text-lg sm:text-xl md:text-2xl text-primary font-semibold tracking-wide">
                   LET'S BUILD SOMETHING EXTRAORDINARY
                 </span>
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full animate-pulse" />
               </div>
               
-              <div className="w-32 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto" />
+              <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-red-600 to-red-700 rounded-full mx-auto" />
             </div>
 
             <motion.div
@@ -78,30 +78,30 @@ export function ContactSection() {
                   setIsSchedulingOpen(true)
                   setIsFormOpen(true)
                 }}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 text-xl px-12 py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow flex items-center gap-3"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg md:text-xl px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25 animate-glow flex items-center gap-2 sm:gap-3 min-h-[44px] w-full sm:w-auto"
               >
-                <Calendar className="w-6 h-6" />
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
                 Schedule a Meeting
               </Button>
             </motion.div>
           </motion.div>
 
           {/* Contact Information Cards */}
-          <div ref={ref} className="grid md:grid-cols-3 gap-8">
+          <div ref={ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {contactInfo.map((info, index) => (
               <motion.div
                 key={info.title}
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                 transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
-                className="text-center p-8 bg-card/50 border border-border/50 rounded-xl hover:border-primary/50 transition-all duration-300 hover-lift backdrop-blur-sm"
+                className="text-center p-6 sm:p-8 bg-card/50 border border-border/50 rounded-xl hover:border-primary/50 transition-all duration-300 hover-lift backdrop-blur-sm"
               >
-                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <info.icon className="w-8 h-8 text-primary" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                  <info.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-white text-xl mb-2">{info.title}</h3>
-                <p className="text-primary font-medium text-lg mb-2">{info.details}</p>
-                <p className="text-sm text-muted-foreground">{info.description}</p>
+                <h3 className="font-semibold text-white text-lg sm:text-xl mb-2">{info.title}</h3>
+                <p className="text-primary font-medium text-base sm:text-lg mb-2">{info.details}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{info.description}</p>
               </motion.div>
             ))}
           </div>

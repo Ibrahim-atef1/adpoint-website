@@ -21,7 +21,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
 
   return (
     <div 
-      className="relative w-[500px] h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
+      className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -43,8 +43,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
       />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full p-8 text-center">
-        <div className={`w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mb-6 transition-all duration-1000 relative ${isHovered ? 'scale-110' : 'scale-100'}`} style={{ 
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
+        <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-red-600 rounded-full flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative ${isHovered ? 'scale-110' : 'scale-100'}`} style={{ 
           boxShadow: `0 0 25px rgba(185, 28, 28, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)`,
           transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
         }}>
@@ -74,7 +74,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
           ))}
           
           <span 
-            className="text-2xl font-bold text-white transition-all duration-1000 relative z-10"
+            className="text-xl sm:text-2xl font-bold text-white transition-all duration-1000 relative z-10"
             style={{
               transform: isHovered ? 'scale(1.1) rotate(-5deg)' : 'scale(1) rotate(0deg)',
               filter: isHovered ? 'drop-shadow(0 0 8px currentColor)' : 'none'
@@ -84,22 +84,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ title, category, results, des
           </span>
         </div>
         
-        <div className="text-red-400 text-sm font-medium mb-2 uppercase tracking-wider">
+        <div className="text-red-400 text-xs sm:text-sm font-medium mb-2 uppercase tracking-wider">
           {category}
         </div>
         
-        <h3 className="text-2xl font-bold text-white font-display mb-4 float">
+        <h3 className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4 float">
           {title}
         </h3>
         
-        <div className="bg-red-600/20 text-red-400 px-4 py-2 rounded-full text-sm font-semibold mb-4 backdrop-blur-sm border border-red-400/20">
+        <div className="bg-red-600/20 text-red-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-3 sm:mb-4 backdrop-blur-sm border border-red-400/20">
           {results}
         </div>
 
         {/* Hover Description */}
         <div className={`transition-all duration-1000 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <p className="text-gray-300 text-sm leading-relaxed max-w-sm">
+          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/10">
+            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-sm">
               {description}
             </p>
           </div>
@@ -116,8 +116,15 @@ export function PortfolioSection() {
   useEffect(() => {
     if (!sectionRef.current || !containerRef.current) return
 
-    const cardWidth = 500 + 40 // card width + gap
     const viewportWidth = window.innerWidth
+    const isMobile = viewportWidth < 768
+    
+    if (isMobile) {
+      // On mobile, stack cards vertically without horizontal scroll
+      return
+    }
+
+    const cardWidth = 500 + 40 // card width + gap
     const totalCards = 6
     const totalScrollDistance = (totalCards - 1) * cardWidth
 
@@ -203,29 +210,41 @@ export function PortfolioSection() {
   ]
 
   return (
-    <section ref={sectionRef} className="relative w-full h-screen bg-black">
+    <section ref={sectionRef} className="relative w-full min-h-screen bg-black">
       {/* Header */}
-      <div className="absolute top-8 left-0 right-0 z-20">
-        <h2 className="text-4xl font-bold text-white text-center font-display">
+      <div className="absolute top-8 left-0 right-0 z-20 px-4">
+        <h2 className="text-3xl sm:text-4xl font-bold text-white text-center font-display">
           Our Work
         </h2>
       </div>
 
       {/* Cards Container */}
-      <div className="relative h-full flex items-center overflow-hidden">
-        <div 
-          ref={containerRef} 
-          className="flex flex-nowrap items-center"
-          style={{ 
-            width: 'max-content',
-            transform: 'translate3d(0, 0, 0)'
-          }}
-        >
-          {projects.map((project, i) => (
-            <div key={i} className="px-5">
-              <ProjectCard {...project} />
-            </div>
-          ))}
+      <div className="relative min-h-screen flex items-center overflow-hidden pt-20 sm:pt-24">
+        {/* Desktop: Horizontal scroll */}
+        <div className="hidden md:block w-full h-full">
+          <div 
+            ref={containerRef} 
+            className="flex flex-nowrap items-center"
+            style={{ 
+              width: 'max-content',
+              transform: 'translate3d(0, 0, 0)'
+            }}
+          >
+            {projects.map((project, i) => (
+              <div key={i} className="px-5">
+                <ProjectCard {...project} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile: Vertical stack */}
+        <div className="md:hidden w-full px-4">
+          <div className="grid grid-cols-1 gap-6 max-w-sm mx-auto">
+            {projects.map((project, i) => (
+              <ProjectCard key={i} {...project} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
