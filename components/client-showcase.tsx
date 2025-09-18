@@ -160,17 +160,6 @@ export function ClientShowcase() {
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ scale: 1.1, y: -10 }}
                 className="flex-shrink-0 group cursor-pointer relative"
-                // Mobile-specific animations
-                animate={isMobile ? {
-                  scale: [1, 1.02, 1],
-                  y: [0, -3, 0],
-                } : {}}
-                transition={{
-                  duration: 3 + index * 0.1,
-                  repeat: Number.POSITIVE_INFINITY,
-                  ease: "easeInOut",
-                  delay: index * 0.2,
-                }}
               >
                 <div className="bg-gray-900/50 hover:bg-gray-800/80 border border-gray-800 hover:border-red-600/50 rounded-2xl p-4 sm:p-6 md:p-8 transition-all duration-300 min-w-[150px] sm:min-w-[180px] md:min-w-[200px] text-center relative overflow-hidden">
                   {/* Mobile floating elements for each card */}

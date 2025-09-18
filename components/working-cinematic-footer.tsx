@@ -233,13 +233,13 @@ export function WorkingCinematicFooter() {
                   <div className="space-y-4 lg:space-y-6">
                     <div className="flex items-center space-x-4">
                       <a 
-                        href="https://instagram.com/adpoint.agency" 
+                        href="https://www.instagram.com/adpoint.eg/" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200"
                       >
                         <Instagram className="w-6 h-6 text-red-400" />
-                        <span className="text-red-200 text-base lg:text-lg">@adpoint.agency</span>
+                        <span className="text-red-200 text-base lg:text-lg">@adpoint.eg</span>
                       </a>
                     </div>
                     
