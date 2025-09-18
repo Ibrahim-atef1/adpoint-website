@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from "next"
 import { Poppins, Montserrat } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
-import { CursorEffect } from "@/components/cursor-effect"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { FloatingCTA } from "@/components/floating-cta"
 import { FormProvider } from "@/contexts/FormContext"
@@ -12,15 +11,17 @@ import "./globals.css"
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
 })
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
 })
 
 export const metadata: Metadata = {
@@ -56,11 +57,20 @@ export default function RootLayout({
               window.addEventListener('pageshow', function() {
                 window.scrollTo(0, 0);
               });
+              
+              // Suppress hydration warnings for browser extensions
+              const originalError = console.error;
+              console.error = (...args) => {
+                if (typeof args[0] === 'string' && args[0].includes('Hydration')) {
+                  return;
+                }
+                originalError.apply(console, args);
+              };
             `,
           }}
         />
       </head>
-      <body className="font-sans antialiased relative mobile-optimized">
+      <body className="font-sans antialiased relative mobile-optimized" suppressHydrationWarning={true}>
         <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black opacity-60" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(185,28,28,0.08),transparent_50%)]" />

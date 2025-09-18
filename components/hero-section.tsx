@@ -7,7 +7,7 @@ import { useRef, useEffect, useState } from "react"
 import { useForm } from "@/contexts/FormContext"
 
 export function HeroSection() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hasScrolled, setHasScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
