@@ -5,13 +5,14 @@ import { ChevronDown, Sparkles, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRef, useEffect, useState } from "react"
 import { useForm } from "@/contexts/FormContext"
+import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
 
 export function HeroSection() {
   const ref = useRef<HTMLElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hasScrolled, setHasScrolled] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const { setIsNavigating } = useForm()
+  const { isMobile, isLowEnd, reducedMotion, animationQuality } = useMobileOptimization()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -21,48 +22,44 @@ export function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
   useEffect(() => {
-    // Check if mobile - use passive detection
-    const checkMobile = () => {
-      const isMobileDevice = window.innerWidth < 768
-      if (isMobileDevice !== isMobile) {
-        setIsMobile(isMobileDevice)
-      }
+    // Skip mouse tracking on mobile for better performance
+    if (isMobile) {
+      const startHero = () => setHasScrolled(true)
+      startHero()
+      return
     }
-    
-    // Initial check
-    checkMobile()
-    
-    // Throttled resize handler to reduce main thread work
-    let resizeTimeout: NodeJS.Timeout
-    const throttledResize = () => {
-      clearTimeout(resizeTimeout)
-      resizeTimeout = setTimeout(checkMobile, 100)
-    }
-    
-    window.addEventListener('resize', throttledResize, { passive: true })
 
-    // Optimized mouse move handler with throttling
-    let mouseTimeout: NodeJS.Timeout
+    // Desktop mouse tracking with RAF throttling
+    let rafId: number | null = null
+    let lastMouseX = 0
+    let lastMouseY = 0
+    
     const handleMouseMove = (e: MouseEvent) => {
-      if (mouseTimeout) return
+      if (rafId || reducedMotion) return
       
-      mouseTimeout = setTimeout(() => {
+      rafId = requestAnimationFrame(() => {
         const rect = ref.current?.getBoundingClientRect()
         if (rect) {
-          setMousePosition({
-            x: (e.clientX - rect.left - rect.width / 2) / 20,
-            y: (e.clientY - rect.top - rect.height / 2) / 20,
-          })
+          const newX = (e.clientX - rect.left - rect.width / 2) / 20
+          const newY = (e.clientY - rect.top - rect.height / 2) / 20
+          
+          // Only update if position changed significantly
+          const threshold = animationQuality === 'low' ? 2 : 0.5
+          if (Math.abs(newX - lastMouseX) > threshold || Math.abs(newY - lastMouseY) > threshold) {
+            setMousePosition({ x: newX, y: newY })
+            lastMouseX = newX
+            lastMouseY = newY
+          }
         }
-        mouseTimeout = null
-      }, 16) // ~60fps throttling
+        rafId = null
+      })
     }
 
     // Start hero animations immediately on load
     const startHero = () => setHasScrolled(true)
 
     const heroElement = ref.current
-    if (heroElement) {
+    if (heroElement && !isMobile) {
       heroElement.addEventListener("mousemove", handleMouseMove, { passive: true })
     }
     
@@ -70,14 +67,14 @@ export function HeroSection() {
     startHero()
     
     return () => {
-      clearTimeout(resizeTimeout)
-      clearTimeout(mouseTimeout)
-      window.removeEventListener('resize', throttledResize)
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+      }
       if (heroElement) {
         heroElement.removeEventListener("mousemove", handleMouseMove)
       }
     }
-  }, [isMobile])
+  }, [isMobile, reducedMotion, animationQuality])
 
   const scrollToAbout = () => {
     setIsNavigating(true)
@@ -187,36 +184,42 @@ export function HeroSection() {
               <Sparkles className="w-6 h-6" />
             </motion.div>
             <motion.div
-              className="absolute top-32 right-12 text-primary/30 md:hidden"
-              animate={{
-                y: [10, -10, 10],
-                rotate: [0, -5, 0],
-                opacity: [0.3, 0.6, 0.3],
+              className="absolute top-32 right-12 text-primary/20 md:hidden"
+              animate={reducedMotion ? {} : {
+                y: [5, -5, 5],
+                opacity: [0.2, 0.4, 0.2],
               }}
               transition={{
-                duration: 5,
+                duration: 8,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
                 delay: 1,
               }}
+              style={{
+                willChange: 'transform, opacity',
+                transform: 'translate3d(0, 0, 0)',
+              }}
             >
-              <Zap className="w-5 h-5" />
+              <Zap className="w-4 h-4" />
             </motion.div>
             <motion.div
-              className="absolute bottom-40 left-12 text-primary/30 md:hidden"
-              animate={{
-                y: [-8, 8, -8],
-                rotate: [0, 3, 0],
-                opacity: [0.2, 0.5, 0.2],
+              className="absolute bottom-40 left-12 text-primary/20 md:hidden"
+              animate={reducedMotion ? {} : {
+                y: [-4, 4, -4],
+                opacity: [0.1, 0.3, 0.1],
               }}
               transition={{
-                duration: 6,
+                duration: 10,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
-                delay: 1.5,
+                delay: 2,
+              }}
+              style={{
+                willChange: 'transform, opacity',
+                transform: 'translate3d(0, 0, 0)',
               }}
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3 h-3" />
             </motion.div>
           </>
         )}
@@ -228,12 +231,16 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={hasScrolled ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.9 }}
           transition={{ duration: 0.9, ease: "easeOut", delay: 0.4 }}
-          className="space-y-6 sm:space-y-8"
+          className="space-y-6 sm:space-y-8 performance-optimized"
+          style={{ willChange: 'transform, opacity' }}
         >
           <motion.h1
-            className="font-display font-bold text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-balance leading-tight"
+            className="font-display font-bold text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-balance leading-tight performance-optimized"
             style={{
-              transform: `translate(${mousePosition.x * 0.1}px, ${mousePosition.y * 0.1}px)`,
+              transform: isMobile 
+                ? 'translate3d(0, 0, 0)' 
+                : `translate3d(${mousePosition.x * 0.1}px, ${mousePosition.y * 0.1}px, 0)`,
+              willChange: isMobile ? 'auto' : 'transform',
             }}
           >
             <motion.span

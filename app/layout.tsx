@@ -6,6 +6,8 @@ import { Suspense } from "react"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { FloatingCTA } from "@/components/floating-cta"
 import { FormProvider } from "@/contexts/FormContext"
+import { PerformanceMonitor } from "@/components/performance-monitor"
+import { MobilePerformanceSummary } from "@/components/mobile-performance-summary"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -58,6 +60,14 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
         
+        {/* Preload critical resources */}
+        <link rel="preload" href="/logo/Transparent Logo.png" as="image" type="image/png" />
+        
+        {/* Performance optimizations */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#ef4444" />
+        <meta name="color-scheme" content="dark" />
+        
         {/* Critical inline script */}
         <script
           dangerouslySetInnerHTML={{
@@ -94,6 +104,24 @@ export default function RootLayout({
                     });
                   }, 1);
                 }
+                
+                // High-performance scroll optimization
+                let ticking = false;
+                function updateScroll() {
+                  // Batch scroll updates for better performance
+                  ticking = false;
+                }
+                
+                function requestScrollUpdate() {
+                  if (!ticking) {
+                    requestAnimationFrame(updateScroll);
+                    ticking = true;
+                  }
+                }
+                
+                // Use passive listeners for better scroll performance
+                window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+                window.addEventListener('touchmove', requestScrollUpdate, { passive: true });
               })();
             `,
           }}
@@ -116,6 +144,12 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <Analytics />
           </Suspense>
+          {process.env.NODE_ENV === 'development' && (
+            <>
+              <PerformanceMonitor />
+              <MobilePerformanceSummary />
+            </>
+          )}
         </FormProvider>
       </body>
     </html>

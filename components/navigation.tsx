@@ -6,11 +6,13 @@ import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useForm } from "@/contexts/FormContext"
+import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { setIsNavigating } = useForm()
+  const { isMobile, isLowEnd } = useMobileOptimization()
 
   useEffect(() => {
     let ticking = false
@@ -118,9 +120,14 @@ export function Navigation() {
           </div>
 
           <button
-            className="md:hidden text-white hover:text-red-700 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="md:hidden text-white hover:text-red-700 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center mobile-touch-target"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onTouchStart={(e) => e.preventDefault()}
             aria-label="Toggle mobile menu"
+            style={{
+              willChange: 'transform, color',
+              transform: 'translate3d(0, 0, 0)',
+            }}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -132,8 +139,15 @@ export function Navigation() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              className="md:hidden bg-black/95 backdrop-blur-md border-t border-white/10"
+              transition={{ 
+                duration: isMobile ? 0.3 : 0.6, 
+                ease: "easeInOut" 
+              }}
+              className="md:hidden bg-black/95 backdrop-blur-md border-t border-white/10 mobile-performance"
+              style={{
+                willChange: 'transform, opacity',
+                transform: 'translate3d(0, 0, 0)',
+              }}
             >
               <div className="px-4 py-6 space-y-2">
                 <button
@@ -142,7 +156,11 @@ export function Navigation() {
                     scrollToSection("about")
                     setIsMobileMenuOpen(false)
                   }}
-                  className="block w-full text-left text-white hover:text-red-700 transition-colors font-medium py-4 min-h-[44px] flex items-center"
+                  className="block w-full text-left text-white hover:text-red-700 transition-colors font-medium py-4 mobile-touch-target"
+                  style={{
+                    willChange: 'color',
+                    transform: 'translate3d(0, 0, 0)',
+                  }}
                 >
                   About Us
                 </button>

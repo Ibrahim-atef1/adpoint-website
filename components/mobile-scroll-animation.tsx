@@ -52,7 +52,15 @@ export function MobileScrollAnimation({
   }
 
   return (
-    <div ref={ref} className={getAnimationClass()}>
+    <div 
+      ref={ref} 
+      className={`${getAnimationClass()} performance-optimized`}
+      style={{
+        willChange: 'transform, opacity',
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden',
+      }}
+    >
       {children}
     </div>
   )

@@ -94,6 +94,19 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 2rem;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Optimize scrolling performance */
+  * {
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent scroll chaining and improve performance */
+  body {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
   
   button, a, input, textarea, select {
@@ -167,14 +180,74 @@
 .mobile-stagger-4 { transition-delay: 0.4s; }
 .mobile-stagger-5 { transition-delay: 0.5s; }
 
-/* Performance optimizations */
+/* Performance optimizations - GPU acceleration */
 .gpu-accelerated {
   transform: translate3d(0, 0, 0);
   will-change: transform;
 }
 
+.animate-transform {
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.animate-opacity {
+  will-change: opacity;
+}
+
 .smooth-scroll {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* High-performance animation classes */
+.performance-optimized {
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent layout thrashing */
+.no-layout-shift {
+  contain: layout style paint;
+}
+
+/* Optimize for 60fps animations */
+@keyframes smoothFadeIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes smoothSlideIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-50px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes smoothScaleIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 
 /* Mobile optimizations */
@@ -182,6 +255,40 @@
   .mobile-optimized {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+  
+  /* Mobile-specific performance optimizations */
+  .mobile-performance {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Reduce animation complexity on mobile */
+  .mobile-simple-animation {
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+  }
+  
+  /* Optimize touch targets */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* Reduce particle effects on mobile */
+  .mobile-reduced-effects {
+    opacity: 0.6;
+    filter: blur(0.5px);
+  }
+  
+  /* Optimize scrolling performance */
+  .mobile-scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    contain: layout style paint;
   }
 }
 

@@ -13,28 +13,40 @@ export function ParallaxSection({ children, offset = 50 }: ParallaxSectionProps)
   const [isMobile, setIsMobile] = useState(false)
   const [isInView, setIsInView] = useState(false)
   
+  // Use a single scroll progress for better performance
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   })
 
+  // Throttled resize handler
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      clearTimeout(resizeTimeout)
+      resizeTimeout = setTimeout(() => {
+        setIsMobile(window.innerWidth < 768)
+      }, 100)
     }
+    
     checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    window.addEventListener('resize', checkMobile, { passive: true })
+    return () => {
+      clearTimeout(resizeTimeout)
+      window.removeEventListener('resize', checkMobile)
+    }
   }, [])
 
+  // Optimized intersection observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true)
-        }
+        setIsInView(entry.isIntersecting)
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        rootMargin: '50px'
+      }
     )
 
     if (ref.current) {
@@ -63,9 +75,12 @@ export function ParallaxSection({ children, offset = 50 }: ParallaxSectionProps)
       style={{ 
         y: isMobile ? mobileY : y,
         opacity: isMobile ? mobileOpacity : 1,
-        scale: isMobile ? mobileScale : 1
+        scale: isMobile ? mobileScale : 1,
+        willChange: 'transform, opacity',
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden',
       }} 
-      className={`${isMobile ? 'parallax-mobile' : ''} ${isInView ? 'visible' : ''}`}
+      className={`performance-optimized ${isMobile ? 'parallax-mobile' : ''} ${isInView ? 'visible' : ''}`}
       animate={isMobile && isInView ? {
         y: [0, -5, 0],
         scale: [1, 1.01, 1],

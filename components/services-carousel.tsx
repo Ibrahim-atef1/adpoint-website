@@ -5,6 +5,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Palette, Globe, Megaphone, BarChart3, Camera, Code, Sparkles, Zap } from "lucide-react"
 import { motion } from "framer-motion"
+import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
@@ -21,17 +22,11 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const [isTapped, setIsTapped] = useState(false)
+  const { isMobile, isLowEnd, reducedMotion } = useMobileOptimization()
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Check if mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -49,83 +44,88 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       if (cardRef.current) {
         observer.unobserve(cardRef.current)
       }
-      window.removeEventListener('resize', checkMobile)
     }
   }, [])
 
-  // On mobile, show description when in view. On desktop, show on hover
-  const shouldShowDescription = typeof window !== 'undefined' && window.innerWidth < 768 ? isInView : isHovered
+  // Mobile-optimized interaction logic
+  const shouldShowDescription = isMobile ? (isInView || isTapped) : isHovered
+  
+  const handleTap = () => {
+    if (isMobile) {
+      setIsTapped(!isTapped)
+    }
+  }
 
   return (
     <motion.div 
       ref={cardRef}
-      className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 group cursor-pointer performance-optimized"
+      onMouseEnter={() => !isMobile && setIsHovered(true)}
+      onMouseLeave={() => !isMobile && setIsHovered(false)}
+      onTouchStart={handleTap}
+      onClick={handleTap}
       style={{
-        boxShadow: shouldShowDescription 
-          ? `0 0 30px ${color}40, 0 0 60px ${color}20, 0 0 90px ${color}10` 
-          : `0 0 15px ${color}20, 0 0 30px ${color}10`,
-        willChange: 'transform, box-shadow',
-        transform: 'translate3d(0, 0, 0)'
+        willChange: 'transform, opacity',
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden',
+        minHeight: isMobile ? '44px' : 'auto', // Ensure touch target size
       }}
-      animate={isMobile && isInView ? {
-        scale: [1, 1.02, 1],
-        y: [0, -5, 0],
+      whileHover={!isMobile ? { 
+        scale: 1.02,
+        transition: { duration: 0.3, ease: "easeOut" }
+      } : {}}
+      whileTap={isMobile ? {
+        scale: 0.98,
+        transition: { duration: 0.1 }
+      } : {}}
+      animate={isMobile && isInView && !reducedMotion ? {
+        scale: [1, 1.01, 1],
+        y: [0, -2, 0],
       } : {}}
       transition={{
-        duration: 3,
+        duration: isMobile ? 6 : 3,
         repeat: Number.POSITIVE_INFINITY,
         ease: "easeInOut",
         delay: Math.random() * 2,
       }}
     >
-      {/* Underglow effect */}
-      <div 
-        className="absolute inset-0 rounded-2xl opacity-0 transition-all duration-1000"
+      {/* Underglow effect - simplified for mobile */}
+      <motion.div 
+        className="absolute inset-0 rounded-2xl"
         style={{
-          background: `radial-gradient(circle at center, ${color}15, transparent 70%)`,
-          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-          opacity: isHovered ? 1 : 0
+          background: `radial-gradient(circle at center, ${color}${isMobile ? '10' : '15'}, transparent 70%)`,
+        }}
+        animate={{
+          scale: shouldShowDescription ? (isMobile ? 1.05 : 1.1) : 1,
+          opacity: shouldShowDescription ? (isMobile ? 0.8 : 1) : 0,
+        }}
+        transition={{
+          duration: isMobile ? 0.2 : 0.3,
+          ease: "easeOut"
         }}
       />
 
-      {/* Mobile floating elements */}
-      {isMobile && isInView && (
-        <>
-          <motion.div
-            className="absolute top-4 right-4 text-primary/30"
-            animate={{
-              y: [-3, 3, -3],
-              rotate: [0, 5, 0],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: 0.5,
-            }}
-          >
-            <Sparkles className="w-3 h-3" />
-          </motion.div>
-          <motion.div
-            className="absolute bottom-4 left-4 text-primary/30"
-            animate={{
-              y: [3, -3, 3],
-              rotate: [0, -3, 0],
-              opacity: [0.2, 0.5, 0.2],
-            }}
-            transition={{
-              duration: 2.5,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          >
-            <Zap className="w-2 h-2" />
-          </motion.div>
-        </>
+      {/* Mobile floating elements - simplified for performance */}
+      {isMobile && isInView && !reducedMotion && (
+        <motion.div
+          className="absolute top-4 right-4 text-primary/20"
+          animate={{
+            y: [-2, 2, -2],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+          style={{
+            willChange: 'transform, opacity',
+            transform: 'translate3d(0, 0, 0)',
+          }}
+        >
+          <Sparkles className="w-4 h-4" />
+        </motion.div>
       )}
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
