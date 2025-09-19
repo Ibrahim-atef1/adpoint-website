@@ -48,6 +48,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
 
   // Mobile-optimized interaction logic
   const shouldShowDescription = isMobile ? (isInView || isTapped) : isHovered
+  const shouldShowGlow = isMobile ? (isInView || isTapped) : isHovered
   
   const handleTap = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault()
@@ -90,21 +91,39 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         delay: isMobile && isInView && !reducedMotion ? Math.random() * 3 : 0,
       }}
     >
-      {/* Underglow effect - simplified for mobile */}
+      {/* Underglow effect - enhanced for mobile */}
       <motion.div 
         className="absolute inset-0 rounded-2xl"
         style={{
-          background: `radial-gradient(circle at center, ${color}${isMobile ? '10' : '15'}, transparent 70%)`,
+          background: `radial-gradient(circle at center, ${color}${isMobile ? '20' : '15'}, transparent 70%)`,
         }}
         animate={{
-          scale: shouldShowDescription ? (isMobile ? 1.05 : 1.1) : 1,
-          opacity: shouldShowDescription ? (isMobile ? 0.8 : 1) : 0,
+          scale: shouldShowDescription ? (isMobile ? 1.1 : 1.1) : 1,
+          opacity: shouldShowDescription ? (isMobile ? 1 : 1) : (isMobile ? 0.3 : 0),
         }}
         transition={{
-          duration: isMobile ? 0.2 : 0.3,
+          duration: isMobile ? 0.3 : 0.3,
           ease: "easeOut"
         }}
       />
+
+      {/* Additional mobile glow effect */}
+      {isMobile && (
+        <motion.div 
+          className="absolute inset-0 rounded-2xl"
+          style={{
+            background: `linear-gradient(135deg, ${color}15, transparent 50%, ${color}10)`,
+            boxShadow: `inset 0 0 20px ${color}20`,
+          }}
+          animate={{
+            opacity: isInView ? 0.6 : 0.2,
+          }}
+          transition={{
+            duration: 0.5,
+            ease: "easeOut"
+          }}
+        />
+      )}
 
        {/* Mobile floating elements - ultra-simplified for performance */}
        {isMobile && isInView && !reducedMotion && (
@@ -134,12 +153,19 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative"
           style={{
             background: `linear-gradient(135deg, ${color}30, ${color}50)`,
-            boxShadow: `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
+            boxShadow: isMobile ? 
+              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)` :
+              `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
             transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}
           animate={isMobile && isInView ? {
             scale: [1, 1.05, 1],
             rotate: [0, 2, 0],
+            boxShadow: [
+              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)`,
+              `0 0 40px ${color}80, inset 0 1px 0 rgba(255,255,255,0.4)`,
+              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)`
+            ],
           } : {}}
           transition={{
             duration: 2.5,

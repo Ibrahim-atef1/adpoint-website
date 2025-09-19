@@ -19,21 +19,22 @@ export function WorkingCinematicFooter() {
 
       const rect = footerRef.current.getBoundingClientRect()
       const windowHeight = window.innerHeight
+      const isMobile = window.innerWidth < 768
       
       // Check if we've reached the end of the page
       const distanceFromBottom = rect.top - windowHeight
       const isAtEnd = distanceFromBottom <= 0
       
-      // Trigger footer only when we reach the very end of the screen
-      const isAtVeryEnd = distanceFromBottom <= 0 // No buffer - only at exact end
+      // More lenient trigger for mobile devices
+      const isAtVeryEnd = isMobile ? distanceFromBottom <= 100 : distanceFromBottom <= 0
       
       if (isAtVeryEnd && !isFormOpen && !isNavigating) {
         // Start the footer animation
         setIsVisible(true)
         
         // Calculate scroll progress for full screen coverage
-        const scrollPastEnd = Math.abs(distanceFromBottom) // No buffer adjustment
-        const maxScroll = windowHeight * 1.2 // Allow for some scroll past the end
+        const scrollPastEnd = Math.abs(distanceFromBottom)
+        const maxScroll = isMobile ? windowHeight * 0.8 : windowHeight * 1.2
         const progress = Math.min(scrollPastEnd / maxScroll, 1)
         setScrollProgress(progress)
       } else {
@@ -47,13 +48,21 @@ export function WorkingCinematicFooter() {
       setMousePosition({ x: e.clientX, y: e.clientY })
     }
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        setMousePosition({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+      }
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    window.addEventListener('touchmove', handleTouchMove, { passive: true })
     handleScroll() // Initial call
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('touchmove', handleTouchMove)
     }
   }, [isFormOpen, isNavigating])
 
