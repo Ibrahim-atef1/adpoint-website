@@ -24,10 +24,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
   const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
   const [isTapped, setIsTapped] = useState(false)
-  const { isMobile, isLowEnd, reducedMotion } = useMobileOptimization()
+  const { isMobile, isLowEnd, reducedMotion, animationQuality } = useMobileOptimization()
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!cardRef.current) return
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -37,21 +39,19 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       { threshold: 0.3 }
     )
 
-    if (cardRef.current) {
-      observer.observe(cardRef.current)
-    }
+    observer.observe(cardRef.current)
 
     return () => {
-      if (cardRef.current) {
-        observer.unobserve(cardRef.current)
-      }
+      observer.disconnect()
     }
   }, [])
 
   // Mobile-optimized interaction logic
   const shouldShowDescription = isMobile ? (isInView || isTapped) : isHovered
   
-  const handleTap = () => {
+  const handleTap = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     if (isMobile) {
       setIsTapped(!isTapped)
     }
@@ -63,8 +63,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 group cursor-pointer performance-optimized"
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => !isMobile && setIsHovered(false)}
-      onTouchStart={handleTap}
-      onClick={handleTap}
+      onTouchStart={isMobile ? handleTap : undefined}
+      onClick={isMobile ? handleTap : undefined}
       style={{
         willChange: 'transform, opacity',
         transform: 'translate3d(0, 0, 0)',
@@ -85,9 +85,9 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       } : {}}
       transition={{
         duration: isMobile ? 8 : 3,
-        repeat: Number.POSITIVE_INFINITY,
+        repeat: isMobile && isInView && !reducedMotion ? Number.POSITIVE_INFINITY : 0,
         ease: "easeInOut",
-        delay: Math.random() * 3,
+        delay: isMobile && isInView && !reducedMotion ? Math.random() * 3 : 0,
       }}
     >
       {/* Underglow effect - simplified for mobile */}
@@ -107,7 +107,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       />
 
        {/* Mobile floating elements - ultra-simplified for performance */}
-       {isMobile && isInView && !reducedMotion && animationQuality === 'high' && (
+       {isMobile && isInView && !reducedMotion && (
          <motion.div
            className="absolute top-4 right-4 text-primary/15"
            animate={{
@@ -216,60 +216,79 @@ export function ServicesCarousel() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const { isMobile, isLowEnd, reducedMotion } = useMobileOptimization()
+  const [hasError, setHasError] = useState(false)
+
+  // Error boundary for mobile
+  if (hasError) {
+    return (
+      <section className="relative w-full min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-bold mb-4">Services</h2>
+          <p className="text-gray-400">Loading services...</p>
+        </div>
+      </section>
+    )
+  }
 
   useEffect(() => {
-    if (!sectionRef.current || !containerRef.current) return
+    try {
+      if (!sectionRef.current) return
 
-    const viewportWidth = window.innerWidth
-    const isMobileDevice = viewportWidth < 768
-    
-    if (isMobileDevice || isMobile || reducedMotion) {
-      // On mobile, use simplified animations or no animations
-      return
-    }
+      const viewportWidth = window.innerWidth
+      const isMobileDevice = viewportWidth < 768
+      
+      if (isMobileDevice || isMobile || reducedMotion) {
+        // On mobile, use simplified animations or no animations
+        return
+      }
 
-    const cardWidth = 500 + 40 // card width + gap
-    const totalCards = 6
-    const totalScrollDistance = (totalCards - 1) * cardWidth
+      if (!containerRef.current) return
 
+      const cardWidth = 500 + 40 // card width + gap
+      const totalCards = 6
+      const totalScrollDistance = (totalCards - 1) * cardWidth
 
-    const ctx = gsap.context(() => {
-      // Batch DOM operations for better performance
-      const centerOffset = (viewportWidth - cardWidth) / 2
-      gsap.set(containerRef.current, { 
-        x: centerOffset,
-        willChange: 'transform',
-        transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden'
-      })
+      const ctx = gsap.context(() => {
+        // Batch DOM operations for better performance
+        const centerOffset = (viewportWidth - cardWidth) / 2
+        gsap.set(containerRef.current, { 
+          x: centerOffset,
+          willChange: 'transform',
+          transform: 'translate3d(0, 0, 0)',
+          backfaceVisibility: 'hidden'
+        })
 
-      // Calculate scroll distance to show all cards
-      const scrollDistance = totalScrollDistance
+        // Calculate scroll distance to show all cards
+        const scrollDistance = totalScrollDistance
 
-      gsap.to(containerRef.current, {
-        x: centerOffset - scrollDistance,
-        ease: "none",
-        force3D: true, // Force GPU acceleration
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          pin: true,
-          scrub: 1,
-          start: "top top",
-          end: () => `+=${scrollDistance}`,
-          // Optimize refresh rate
-          refreshPriority: 0,
-          onUpdate: () => {
-            // Batch any additional updates
-            requestAnimationFrame(() => {
-              // Any additional DOM updates here
-            })
-          }
-        },
-      })
-    }, sectionRef)
+        gsap.to(containerRef.current, {
+          x: centerOffset - scrollDistance,
+          ease: "none",
+          force3D: true, // Force GPU acceleration
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            pin: true,
+            scrub: 1,
+            start: "top top",
+            end: () => `+=${scrollDistance}`,
+            // Optimize refresh rate
+            refreshPriority: 0,
+            onUpdate: () => {
+              // Batch any additional updates
+              requestAnimationFrame(() => {
+                // Any additional DOM updates here
+              })
+            }
+          },
+        })
+      }, sectionRef)
 
-    return () => {
-      ctx.revert()
+      return () => {
+        ctx.revert()
+      }
+    } catch (error) {
+      console.warn('Services carousel error:', error)
+      setHasError(true)
     }
   }, [isMobile, isLowEnd, reducedMotion])
 
