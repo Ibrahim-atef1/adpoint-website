@@ -1,13 +1,21 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
+import { useEffect, useRef, useState } from "react"
 
-// Register ScrollTrigger plugin
+// Dynamic GSAP import to prevent SSR issues
+let gsap: any = null
+let ScrollTrigger: any = null
+
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger)
+  import("gsap").then((gsapModule) => {
+    gsap = gsapModule.default
+    import("gsap/ScrollTrigger").then((stModule) => {
+      ScrollTrigger = stModule.ScrollTrigger
+      if (gsap && ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger)
+      }
+    })
+  })
 }
 
 interface MobileOptimizedGSAPProps {
@@ -17,10 +25,58 @@ interface MobileOptimizedGSAPProps {
 
 export function MobileOptimizedGSAP({ children, className = "" }: MobileOptimizedGSAPProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const { isMobile, isLowEnd, reducedMotion } = useMobileOptimization()
+  const [isMobile, setIsMobile] = useState(false)
+  const [isLowEnd, setIsLowEnd] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const [gsapLoaded, setGsapLoaded] = useState(false)
+
+  // Safe mobile detection
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const checkDevice = () => {
+      const mobile = window.innerWidth < 768
+      const lowEnd = mobile && (
+        (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) ||
+        ((navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4) ||
+        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      )
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      
+      setIsMobile(mobile)
+      setIsLowEnd(lowEnd)
+      setReducedMotion(motion)
+    }
+
+    checkDevice()
+    window.addEventListener('resize', checkDevice, { passive: true })
+    
+    return () => window.removeEventListener('resize', checkDevice)
+  }, [])
+
+  // Load GSAP dynamically
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const loadGSAP = async () => {
+      try {
+        const gsapModule = await import("gsap")
+        const stModule = await import("gsap/ScrollTrigger")
+        
+        gsap = gsapModule.default
+        ScrollTrigger = stModule.ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger)
+        setGsapLoaded(true)
+      } catch (error) {
+        console.warn('Failed to load GSAP:', error)
+      }
+    }
+
+    loadGSAP()
+  }, [])
 
   useEffect(() => {
-    if (!ref.current || reducedMotion) return
+    if (!ref.current || reducedMotion || !gsapLoaded || !gsap || !ScrollTrigger) return
 
     const elements = ref.current.querySelectorAll('[data-gsap-animate]')
     
@@ -85,7 +141,7 @@ export function MobileOptimizedGSAP({ children, className = "" }: MobileOptimize
         }
       })
     }
-  }, [isMobile, isLowEnd, reducedMotion])
+  }, [isMobile, isLowEnd, reducedMotion, gsapLoaded])
 
   return (
     <div ref={ref} className={className}>

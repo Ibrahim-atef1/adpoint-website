@@ -39,6 +39,7 @@ export function MobilePerformanceBoost() {
       console.log('• Script deferral: 2s delay on mobile')
       console.log('• Font rendering: optimizeSpeed for mobile')
       console.log('• Touch events: Passive listeners only')
+      console.log('• SpeedInsights: Integrated for real-time performance monitoring')
     }
   }, [])
 

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState, ReactNode } from "react"
-import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
 
 interface PerformanceLazyLoaderProps {
   children: ReactNode
@@ -20,8 +19,30 @@ export function PerformanceLazyLoader({
 }: PerformanceLazyLoaderProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isLowEnd, setIsLowEnd] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const { isMobile, isLowEnd } = useMobileOptimization()
+
+  // Safe mobile detection without hook
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    const checkDevice = () => {
+      const mobile = window.innerWidth < 768
+      const lowEnd = mobile && (
+        (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) ||
+        ((navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4) ||
+        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      )
+      setIsMobile(mobile)
+      setIsLowEnd(lowEnd)
+    }
+
+    checkDevice()
+    window.addEventListener('resize', checkDevice, { passive: true })
+    
+    return () => window.removeEventListener('resize', checkDevice)
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(

@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Poppins, Montserrat } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Suspense } from "react"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { FloatingCTA } from "@/components/floating-cta"
@@ -11,6 +12,7 @@ import { MobilePerformanceSummary } from "@/components/mobile-performance-summar
 import { DeferredAnalytics } from "@/components/deferred-analytics"
 import { PerformanceOptimizationSummary } from "@/components/performance-optimization-summary"
 import { MobilePerformanceBoost } from "@/components/mobile-performance-boost"
+import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -250,24 +252,39 @@ export default function RootLayout({
         </div>
 
         <FormProvider>
-          <div className="relative z-10">
-            <LoadingOverlay />
-            <Suspense fallback={null}>{children}</Suspense>
-          </div>
+          <ErrorBoundary>
+            <div className="relative z-10">
+              <LoadingOverlay />
+              <Suspense fallback={null}>{children}</Suspense>
+            </div>
+          </ErrorBoundary>
           <FloatingCTA />
           <Suspense fallback={null}>
             <Analytics />
           </Suspense>
-          <DeferredAnalytics />
+          <Suspense fallback={null}>
+            <SpeedInsights />
+          </Suspense>
+          <ErrorBoundary>
+            <DeferredAnalytics />
+          </ErrorBoundary>
           {process.env.NODE_ENV === 'development' && (
             <>
-              <PerformanceMonitor />
-              <MobilePerformanceSummary />
-              <PerformanceOptimizationSummary />
-              <MobilePerformanceBoost />
-            </>
-          )}
-        </FormProvider>
+              <ErrorBoundary>
+                <PerformanceMonitor />
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <MobilePerformanceSummary />
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <PerformanceOptimizationSummary />
+              </ErrorBoundary>
+          <ErrorBoundary>
+            <MobilePerformanceBoost />
+          </ErrorBoundary>
+        </>
+      )}
+    </FormProvider>
       </body>
     </html>
   )

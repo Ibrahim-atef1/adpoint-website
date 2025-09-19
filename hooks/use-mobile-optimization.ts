@@ -12,6 +12,18 @@ interface MobileOptimization {
 }
 
 export function useMobileOptimization(): MobileOptimization {
+  // Safe fallback for SSR
+  if (typeof window === 'undefined') {
+    return {
+      isMobile: false,
+      isLowEnd: false,
+      reducedMotion: false,
+      particleCount: 12,
+      animationQuality: 'high',
+      shouldDeferJS: false,
+    }
+  }
+
   const [optimization, setOptimization] = useState<MobileOptimization>({
     isMobile: false,
     isLowEnd: false,
@@ -22,10 +34,13 @@ export function useMobileOptimization(): MobileOptimization {
   })
 
   const detectDevice = useCallback(() => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') return
+    
     const isMobile = window.innerWidth < 768
     const isLowEnd = isMobile && (
-      navigator.hardwareConcurrency <= 2 || 
-      navigator.deviceMemory <= 4 ||
+      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) || 
+      ((navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4) ||
       /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     )
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -60,23 +75,30 @@ export function useMobileOptimization(): MobileOptimization {
   }, [])
 
   useEffect(() => {
-    detectDevice()
+    // Safety check for SSR
+    if (typeof window === 'undefined') return
     
-    const handleResize = () => {
-      // Throttle resize detection
-      setTimeout(detectDevice, 100)
-    }
-    
-    window.addEventListener('resize', handleResize, { passive: true })
-    
-    // Listen for reduced motion preference changes
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const handleMotionChange = () => detectDevice()
-    mediaQuery.addEventListener('change', handleMotionChange)
-    
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      mediaQuery.removeEventListener('change', handleMotionChange)
+    try {
+      detectDevice()
+      
+      const handleResize = () => {
+        // Throttle resize detection
+        setTimeout(detectDevice, 100)
+      }
+      
+      window.addEventListener('resize', handleResize, { passive: true })
+      
+      // Listen for reduced motion preference changes
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      const handleMotionChange = () => detectDevice()
+      mediaQuery.addEventListener('change', handleMotionChange)
+      
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        mediaQuery.removeEventListener('change', handleMotionChange)
+      }
+    } catch (error) {
+      console.warn('Mobile optimization detection failed:', error)
     }
   }, [detectDevice])
 

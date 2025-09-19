@@ -24,18 +24,30 @@ export function MobileOptimizedParticles({ className = "" }: MobileOptimizedPart
   const lastTimeRef = useRef(0)
   const isMobileRef = useRef(false)
 
-  const createParticle = useCallback((): Particle => ({
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    vx: (Math.random() - 0.5) * 0.1, // Even slower movement for better performance
-    vy: (Math.random() - 0.5) * 0.1,
-    size: Math.random() * 0.8 + 0.3, // Even smaller particles
-    opacity: Math.random() * 0.15 + 0.03, // Even lower opacity
-    baseSize: Math.random() * 0.8 + 0.3,
-    baseOpacity: Math.random() * 0.15 + 0.03,
-  }), [])
+  const createParticle = useCallback((): Particle => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') {
+      return {
+        x: 0, y: 0, vx: 0, vy: 0, size: 0, opacity: 0, baseSize: 0, baseOpacity: 0
+      }
+    }
+    
+    return {
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * 0.1, // Even slower movement for better performance
+      vy: (Math.random() - 0.5) * 0.1,
+      size: Math.random() * 0.8 + 0.3, // Even smaller particles
+      opacity: Math.random() * 0.15 + 0.03, // Even lower opacity
+      baseSize: Math.random() * 0.8 + 0.3,
+      baseOpacity: Math.random() * 0.15 + 0.03,
+    }
+  }, [])
 
   const initParticles = useCallback(() => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') return
+    
     const isMobile = window.innerWidth < 768
     isMobileRef.current = isMobile
     
@@ -45,6 +57,9 @@ export function MobileOptimizedParticles({ className = "" }: MobileOptimizedPart
   }, [createParticle])
 
   const updateParticles = useCallback((deltaTime: number) => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') return
+    
     const isMobile = isMobileRef.current
     
     particlesRef.current.forEach(particle => {
@@ -133,6 +148,9 @@ export function MobileOptimizedParticles({ className = "" }: MobileOptimizedPart
   }, [updateParticles, renderParticles])
 
   const handleResize = useCallback(() => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') return
+    
     const canvas = canvasRef.current
     if (canvas) {
       canvas.width = window.innerWidth
@@ -142,27 +160,34 @@ export function MobileOptimizedParticles({ className = "" }: MobileOptimizedPart
   }, [initParticles])
 
   useEffect(() => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') return
+    
     const canvas = canvasRef.current
     if (!canvas) return
 
-    // Set canvas size
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    
-    // Initialize particles
-    initParticles()
-    
-    // Start animation
-    animationRef.current = requestAnimationFrame(animate)
-    
-    // Add resize listener
-    window.addEventListener('resize', handleResize, { passive: true })
-    
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
+    try {
+      // Set canvas size
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      
+      // Initialize particles
+      initParticles()
+      
+      // Start animation
+      animationRef.current = requestAnimationFrame(animate)
+      
+      // Add resize listener
+      window.addEventListener('resize', handleResize, { passive: true })
+      
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current)
+        }
+        window.removeEventListener('resize', handleResize)
       }
-      window.removeEventListener('resize', handleResize)
+    } catch (error) {
+      console.warn('Mobile particles initialization failed:', error)
     }
   }, [animate, handleResize, initParticles])
 
