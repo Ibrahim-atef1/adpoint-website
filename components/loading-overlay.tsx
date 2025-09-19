@@ -7,10 +7,10 @@ export function LoadingOverlay() {
   const [show, setShow] = useState(true)
 
   useEffect(() => {
-    const onReady = () => setTimeout(() => setShow(false), 800)
+    const onReady = () => setTimeout(() => setShow(false), 1200)
     if (document.readyState === "complete") onReady()
     else window.addEventListener("load", onReady, { once: true })
-    const fallback = setTimeout(() => setShow(false), 1500)
+    const fallback = setTimeout(() => setShow(false), 2200)
     return () => {
       window.removeEventListener("load", onReady)
       clearTimeout(fallback)

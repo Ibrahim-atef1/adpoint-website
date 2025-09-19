@@ -1,6 +1,7 @@
 import dynamicImport from "next/dynamic"
 import { FormProvider } from "@/contexts/FormContext"
-import { Suspense } from "react"
+import ScrollTransition from "@/components/scroll-transition"
+import CustomCursor from "@/components/custom-cursor"
 
 
 // Optimized dynamic imports with better loading strategies
@@ -15,6 +16,9 @@ const AboutSection = dynamicImport(() => import("@/components/about-section").th
 })
 const ServicesCarousel = dynamicImport(() => import("@/components/services-carousel").then(m => m.ServicesCarousel), { 
   loading: () => <div className="min-h-screen bg-black" />
+})
+const MotionDesignSection = dynamicImport(() => import("@/components/motion-design-section").then(m => m.MotionDesignSection), { 
+  loading: () => <div className="min-h-screen bg-background" />
 })
 const PortfolioSection = dynamicImport(() => import("@/components/portfolio-section").then(m => m.PortfolioSection), { 
   loading: () => <div className="min-h-screen bg-black" />
@@ -36,47 +40,41 @@ export default function HomePage() {
   return (
     <FormProvider>
       <main className="min-h-screen bg-background text-foreground">
+        <CustomCursor />
         <Navigation />
+        <ScrollTransition />
 
         <div id="hero">
           <HeroSection />
         </div>
 
         <div id="about">
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
-            <ParallaxSection offset={30}>
-              <AboutSection />
-            </ParallaxSection>
-          </Suspense>
+          <ParallaxSection offset={30}>
+            <AboutSection />
+          </ParallaxSection>
         </div>
 
         <div id="services">
-          <Suspense fallback={<div className="min-h-screen bg-black" />}>
-            <ServicesCarousel />
-          </Suspense>
+          <ServicesCarousel />
+        </div>
+
+        <div id="motion-design">
+          <MotionDesignSection />
         </div>
 
         <div id="portfolio">
-          <Suspense fallback={<div className="min-h-screen bg-black" />}>
-            <PortfolioSection />
-          </Suspense>
+          <PortfolioSection />
         </div>
 
-        <Suspense fallback={<div className="min-h-screen bg-background" />}>
-          <ClientShowcase />
-        </Suspense>
+        <ClientShowcase />
 
         <div id="contact">
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
-            <ParallaxSection offset={20}>
-              <ContactSection />
-            </ParallaxSection>
-          </Suspense>
+          <ParallaxSection offset={20}>
+            <ContactSection />
+          </ParallaxSection>
         </div>
 
-        <Suspense fallback={<div className="h-32 bg-black" />}>
-          <WorkingCinematicFooter />
-        </Suspense>
+        <WorkingCinematicFooter />
       </main>
     </FormProvider>
   )

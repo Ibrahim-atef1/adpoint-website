@@ -67,11 +67,11 @@ export function ParallaxSection({ children, offset = 50 }: ParallaxSectionProps)
       }} 
       className={`${isMobile ? 'parallax-mobile' : ''} ${isInView ? 'visible' : ''}`}
       animate={isMobile && isInView ? {
-        y: [0, -2, 0],
-        scale: [1, 1.005, 1],
+        y: [0, -5, 0],
+        scale: [1, 1.01, 1],
       } : {}}
       transition={{
-        duration: 6,
+        duration: 4,
         repeat: Number.POSITIVE_INFINITY,
         ease: "easeInOut",
       }}

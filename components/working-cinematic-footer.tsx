@@ -131,9 +131,6 @@ export function WorkingCinematicFooter() {
                   width={600}
                   height={240}
                   className="h-24 sm:h-32 lg:h-48 xl:h-56 w-auto mx-auto lg:mx-0 mb-4 sm:mb-6 lg:mb-8"
-                  quality={90}
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                 />
                 <h2 className="text-xl sm:text-2xl lg:text-4xl xl:text-5xl font-bold text-red-100 mb-3 sm:mb-4 lg:mb-6 leading-tight">
                   Let's Create Something Amazing
@@ -319,11 +316,28 @@ export function WorkingCinematicFooter() {
                   strokeWidth={3}
                   viewBox="0 0 24 24"
                   animate={{
-                    rotate: isVisible ? 0 : 0
+                    rotate: isVisible ? (() => {
+                      // Button position (bottom left: 24px from left, 24px from bottom)
+                      const buttonX = 24
+                      const buttonY = window.innerHeight - 24
+                      
+                      // Calculate angle from button to mouse
+                      const deltaX = mousePosition.x - buttonX
+                      const deltaY = mousePosition.y - buttonY
+                      
+                      // Calculate angle in radians, then convert to degrees
+                      const angleRad = Math.atan2(deltaY, deltaX)
+                      const angleDeg = angleRad * (180 / Math.PI)
+                      
+                      // Adjust for the arrow pointing up by default (add 90 degrees)
+                      return angleDeg + 90
+                    })() : 0
                   }}
                   transition={{ 
-                    duration: 0.3,
-                    ease: "easeOut"
+                    type: "spring",
+                    stiffness: 150,
+                    damping: 15,
+                    mass: 0.8
                   }}
                 >
                   <path 

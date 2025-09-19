@@ -33,7 +33,7 @@ export function AboutSection() {
   ]
 
   return (
-    <section id="about" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+    <section ref={ref} id="about" className="about-section pt-10 pb-16 sm:pt-14 sm:pb-24 lg:pt-20 lg:pb-32 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
       <motion.div className="absolute inset-0 opacity-5" style={{ y }}>
         <div className="absolute top-20 left-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
@@ -94,9 +94,9 @@ export function AboutSection() {
       )}
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div ref={ref} className="grid lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-20 items-center">
+        <div className="about-content grid lg:grid-cols-2 gap-12 sm:gap-16 lg:gap-20 items-center">
           {/* Text Content */}
-          <div className="space-y-8 sm:space-y-12">
+          <div className="magnetic space-y-8 sm:space-y-12">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -147,6 +147,7 @@ export function AboutSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+            className="magnetic"
           >
             <div className="grid grid-cols-2 gap-4 sm:gap-6">
               {stats.map((stat, index) => (

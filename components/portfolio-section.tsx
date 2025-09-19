@@ -266,30 +266,46 @@ export function PortfolioSection() {
     const totalCards = 6
     const totalScrollDistance = (totalCards - 1) * cardWidth
 
+    // Add a small delay to ensure other ScrollTriggers are initialized first
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
+        // Center the first card by offsetting the container
+        const centerOffset = (viewportWidth - cardWidth) / 2
+        gsap.set(containerRef.current, { x: centerOffset })
 
-    const ctx = gsap.context(() => {
-      // Center the first card by offsetting the container
-      const centerOffset = (viewportWidth - cardWidth) / 2
-      gsap.set(containerRef.current, { x: centerOffset })
+        // Calculate scroll distance to show all cards
+        const scrollDistance = totalScrollDistance
 
-      // Calculate scroll distance to show all cards
-      const scrollDistance = totalScrollDistance
+        gsap.to(containerRef.current, {
+          x: centerOffset - scrollDistance,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            pin: true,
+            scrub: 1,
+            start: "top top",
+            end: () => `+=${scrollDistance}`,
+            id: "portfolio-scroll", // Add unique ID
+            onUpdate: (self) => {
+              console.log("Portfolio scroll progress:", self.progress)
+            }
+          },
+        })
 
-      gsap.to(containerRef.current, {
-        x: centerOffset - scrollDistance,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          pin: true,
-          scrub: 1,
-          start: "top top",
-          end: () => `+=${scrollDistance}`,
-        },
-      })
-    }, sectionRef)
+        // Refresh ScrollTrigger after a short delay to ensure proper initialization
+        setTimeout(() => {
+          ScrollTrigger.refresh()
+          console.log("Portfolio ScrollTrigger refreshed")
+        }, 100)
+      }, sectionRef)
+
+      return () => {
+        ctx.revert()
+      }
+    }, 500) // Delay to ensure other components are loaded
 
     return () => {
-      ctx.revert()
+      clearTimeout(timer)
     }
   }, [])
 

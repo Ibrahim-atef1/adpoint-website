@@ -70,14 +70,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         transform: 'translate3d(0, 0, 0)'
       }}
       animate={isMobile && isInView ? {
-        scale: [1, 1.01, 1],
-        y: [0, -2, 0],
+        scale: [1, 1.02, 1],
+        y: [0, -5, 0],
       } : {}}
       transition={{
-        duration: 4,
+        duration: 3,
         repeat: Number.POSITIVE_INFINITY,
         ease: "easeInOut",
-        delay: 0.5,
+        delay: Math.random() * 2,
       }}
     >
       {/* Underglow effect */}
@@ -90,23 +90,42 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         }}
       />
 
-      {/* Mobile floating elements - reduced for performance */}
+      {/* Mobile floating elements */}
       {isMobile && isInView && (
-        <motion.div
-          className="absolute top-4 right-4 text-primary/30"
-          animate={{
-            y: [-2, 2, -2],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 0.5,
-          }}
-        >
-          <Sparkles className="w-3 h-3" />
-        </motion.div>
+        <>
+          <motion.div
+            className="absolute top-4 right-4 text-primary/30"
+            animate={{
+              y: [-3, 3, -3],
+              rotate: [0, 5, 0],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 0.5,
+            }}
+          >
+            <Sparkles className="w-3 h-3" />
+          </motion.div>
+          <motion.div
+            className="absolute bottom-4 left-4 text-primary/30"
+            animate={{
+              y: [3, -3, 3],
+              rotate: [0, -3, 0],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          >
+            <Zap className="w-2 h-2" />
+          </motion.div>
+        </>
       )}
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
@@ -118,14 +137,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
             transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}
           animate={isMobile && isInView ? {
-            scale: [1, 1.02, 1],
-            rotate: [0, 1, 0],
+            scale: [1, 1.05, 1],
+            rotate: [0, 2, 0],
           } : {}}
           transition={{
-            duration: 4,
+            duration: 2.5,
             repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
-            delay: 0.5,
+            delay: 0.3,
           }}
         >
           {/* Animated background ring */}
@@ -167,13 +186,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         <motion.h3 
           className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4"
           animate={isMobile && isInView ? {
-            scale: [1, 1.01, 1],
+            scale: [1, 1.02, 1],
           } : {}}
           transition={{
-            duration: 4,
+            duration: 2,
             repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
-            delay: 0.8,
+            delay: 0.5,
           }}
         >
           {title}
@@ -279,25 +298,27 @@ export function ServicesCarousel() {
 
   return (
     <section ref={sectionRef} className="relative w-full min-h-screen bg-black">
-      {/* Mobile floating background elements - reduced for performance */}
+      {/* Mobile floating background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(2)].map((_, i) => (
+        {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-primary/20 rounded-full md:hidden"
             style={{
-              left: `${30 + i * 40}%`,
-              top: `${40 + i * 20}%`,
+              left: `${10 + i * 15}%`,
+              top: `${20 + (i % 3) * 25}%`,
             }}
             animate={{
-              y: [-10, 10, -10],
-              opacity: [0.1, 0.3, 0.1],
+              y: [-20, 20, -20],
+              x: [-10, 10, -10],
+              opacity: [0.1, 0.4, 0.1],
+              scale: [0.5, 1.5, 0.5],
             }}
             transition={{
-              duration: 6 + i * 2,
+              duration: 8 + i * 0.5,
               repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
-              delay: i * 1,
+              delay: i * 0.8,
             }}
           />
         ))}
@@ -308,10 +329,10 @@ export function ServicesCarousel() {
         <motion.h2 
           className="text-3xl sm:text-4xl font-bold text-white text-center font-display"
           animate={{
-            scale: [1, 1.01, 1],
+            scale: [1, 1.02, 1],
           }}
           transition={{
-            duration: 6,
+            duration: 4,
             repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
           }}

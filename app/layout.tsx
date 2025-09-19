@@ -14,7 +14,6 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   display: "swap",
   preload: true,
-  fallback: ['system-ui', 'arial'],
 })
 
 const montserrat = Montserrat({
@@ -23,7 +22,6 @@ const montserrat = Montserrat({
   weight: ["400", "500", "600", "700"],
   display: "swap",
   preload: true,
-  fallback: ['system-ui', 'arial'],
 })
 
 export const metadata: Metadata = {
@@ -86,9 +84,7 @@ export default function RootLayout({
             <Suspense fallback={null}>{children}</Suspense>
           </div>
           <FloatingCTA />
-          <Suspense fallback={null}>
-            <Analytics />
-          </Suspense>
+          <Analytics />
         </FormProvider>
       </body>
     </html>
