@@ -1,139 +1,83 @@
-import dynamic from "next/dynamic"
-import { MobileLazyLoader } from "@/components/mobile-lazy-loader"
-import { MobileHeroSection } from "@/components/mobile-hero-section"
-import { MobileServicesSection } from "@/components/mobile-services-section"
+import dynamicImport from "next/dynamic"
+import { FormProvider } from "@/contexts/FormContext"
+import { Suspense } from "react"
 
-// Critical above-the-fold components (load immediately)
-const Navigation = dynamic(() => import("@/components/navigation").then(m => m.Navigation), { 
-  loading: () => <div className="h-16 bg-black" />
+
+// Optimized dynamic imports with better loading strategies
+const Navigation = dynamicImport(() => import("@/components/navigation").then(m => m.Navigation), { 
+  loading: () => <div className="h-16" />
 })
-
-// Desktop components (lazy load)
-const HeroSection = dynamic(() => import("@/components/hero-section").then(m => m.HeroSection), { 
+const HeroSection = dynamicImport(() => import("@/components/hero-section").then(m => m.HeroSection), { 
   loading: () => <div className="min-h-screen bg-background" />
 })
-
-const ServicesCarousel = dynamic(() => import("@/components/services-carousel").then(m => m.ServicesCarousel), { 
+const AboutSection = dynamicImport(() => import("@/components/about-section").then(m => m.AboutSection), {
+  loading: () => <div className="min-h-screen bg-background" />
+})
+const ServicesCarousel = dynamicImport(() => import("@/components/services-carousel").then(m => m.ServicesCarousel), { 
   loading: () => <div className="min-h-screen bg-black" />
 })
-
-// Below-the-fold components (lazy load)
-const AboutSection = dynamic(() => import("@/components/about-section").then(m => m.AboutSection), {
-  loading: () => <div className="min-h-screen bg-background" />
-})
-
-const PortfolioSection = dynamic(() => import("@/components/portfolio-section").then(m => m.PortfolioSection), { 
+const PortfolioSection = dynamicImport(() => import("@/components/portfolio-section").then(m => m.PortfolioSection), { 
   loading: () => <div className="min-h-screen bg-black" />
 })
-
-const ClientShowcase = dynamic(() => import("@/components/client-showcase").then(m => m.ClientShowcase), { 
+const ClientShowcase = dynamicImport(() => import("@/components/client-showcase").then(m => m.ClientShowcase), { 
   loading: () => <div className="min-h-screen bg-background" />
 })
-
-const ContactSection = dynamic(() => import("@/components/contact-section").then(m => m.ContactSection), {
+const ContactSection = dynamicImport(() => import("@/components/contact-section").then(m => m.ContactSection), {
   loading: () => <div className="min-h-screen bg-background" />
 })
-
-const WorkingCinematicFooter = dynamic(() => import("@/components/working-cinematic-footer").then(m => m.WorkingCinematicFooter), {
+const WorkingCinematicFooter = dynamicImport(() => import("@/components/working-cinematic-footer").then(m => m.WorkingCinematicFooter), {
   loading: () => <div className="h-32 bg-black" />
 })
-
-const ParallaxSection = dynamic(() => import("@/components/parallax-section").then(m => m.ParallaxSection), {
+const ParallaxSection = dynamicImport(() => import("@/components/parallax-section").then(m => m.ParallaxSection), {
   loading: () => <div className="min-h-screen bg-background" />
 })
 
 export default function HomePage() {
   return (
-    <>
-      {/* Desktop Version */}
-      <div className="hidden md:block">
-        <main className="min-h-screen bg-background text-foreground">
-          <Navigation />
+    <FormProvider>
+      <main className="min-h-screen bg-background text-foreground">
+        <Navigation />
 
-          <div id="hero">
-            <HeroSection />
-          </div>
+        <div id="hero">
+          <HeroSection />
+        </div>
 
-          <MobileLazyLoader>
-            <div id="about">
-              <ParallaxSection offset={30}>
-                <AboutSection />
-              </ParallaxSection>
-            </div>
-          </MobileLazyLoader>
+        <div id="about">
+          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <ParallaxSection offset={30}>
+              <AboutSection />
+            </ParallaxSection>
+          </Suspense>
+        </div>
 
-          <MobileLazyLoader>
-            <div id="services">
-              <ServicesCarousel />
-            </div>
-          </MobileLazyLoader>
+        <div id="services">
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <ServicesCarousel />
+          </Suspense>
+        </div>
 
-          <MobileLazyLoader>
-            <div id="portfolio">
-              <PortfolioSection />
-            </div>
-          </MobileLazyLoader>
+        <div id="portfolio">
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <PortfolioSection />
+          </Suspense>
+        </div>
 
-          <MobileLazyLoader>
-            <ClientShowcase />
-          </MobileLazyLoader>
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <ClientShowcase />
+        </Suspense>
 
-          <MobileLazyLoader>
-            <div id="contact">
-              <ParallaxSection offset={20}>
-                <ContactSection />
-              </ParallaxSection>
-            </div>
-          </MobileLazyLoader>
-
-          <MobileLazyLoader>
-            <WorkingCinematicFooter />
-          </MobileLazyLoader>
-        </main>
-      </div>
-
-      {/* Mobile Version */}
-      <div className="md:hidden">
-        <main className="min-h-screen bg-background text-foreground">
-          <Navigation />
-
-          <div id="hero">
-            <MobileHeroSection />
-          </div>
-
-          <MobileLazyLoader fallback={<div className="min-h-screen bg-black" />}>
-            <div id="about">
-              <ParallaxSection offset={30}>
-                <AboutSection />
-              </ParallaxSection>
-            </div>
-          </MobileLazyLoader>
-
-          <MobileLazyLoader fallback={<div className="min-h-screen bg-black" />}>
-            <div id="services">
-              <MobileServicesSection />
-            </div>
-          </MobileLazyLoader>
-
-          <MobileLazyLoader fallback={<div className="min-h-screen bg-black" />}>
-            <div id="portfolio">
-              <PortfolioSection />
-            </div>
-          </MobileLazyLoader>
-
-          <MobileLazyLoader fallback={<div className="min-h-screen bg-background" />}>
-            <ClientShowcase />
-          </MobileLazyLoader>
-
-          <MobileLazyLoader fallback={<div className="min-h-screen bg-background" />}>
-            <div id="contact">
+        <div id="contact">
+          <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <ParallaxSection offset={20}>
               <ContactSection />
-            </div>
-          </MobileLazyLoader>
+            </ParallaxSection>
+          </Suspense>
+        </div>
 
+        <Suspense fallback={<div className="h-32 bg-black" />}>
           <WorkingCinematicFooter />
-        </main>
-      </div>
-    </>
+        </Suspense>
+      </main>
+    </FormProvider>
   )
 }

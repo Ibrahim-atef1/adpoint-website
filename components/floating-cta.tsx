@@ -4,12 +4,11 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Calendar, X } from "lucide-react"
 import { SchedulingForm } from "@/components/scheduling-form"
-import { useForm } from "@/contexts/FormContext"
 
 export function FloatingCTA() {
   const [isVisible, setIsVisible] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(false)
   const [scrollY, setScrollY] = useState(0)
-  const { isFormOpen, setIsFormOpen } = useForm()
 
   useEffect(() => {
     let ticking = false
@@ -20,19 +19,12 @@ export function FloatingCTA() {
           const currentScrollY = window.scrollY
           setScrollY(currentScrollY)
           
-          // Show floating CTA immediately on mobile, after 400px on desktop
-          const isMobile = window.innerWidth < 768
-          setIsVisible(isMobile || currentScrollY > 400)
+          // Show floating CTA after scrolling past hero section (800px)
+          setIsVisible(currentScrollY > 800)
           ticking = false
         })
         ticking = true
       }
-    }
-
-    // Check initial state
-    const isMobile = window.innerWidth < 768
-    if (isMobile) {
-      setIsVisible(true)
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -46,13 +38,6 @@ export function FloatingCTA() {
 
   return (
     <>
-      {/* Debug Info */}
-      {isVisible && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white p-2 text-xs z-50 rounded">
-          FLOATING CTA IS VISIBLE!
-        </div>
-      )}
-      
       <AnimatePresence>
         {isVisible && (
           <motion.div

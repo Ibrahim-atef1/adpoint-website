@@ -13,40 +13,28 @@ export function ParallaxSection({ children, offset = 50 }: ParallaxSectionProps)
   const [isMobile, setIsMobile] = useState(false)
   const [isInView, setIsInView] = useState(false)
   
-  // Use a single scroll progress for better performance
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   })
 
-  // Throttled resize handler
   useEffect(() => {
-    let resizeTimeout: NodeJS.Timeout
     const checkMobile = () => {
-      clearTimeout(resizeTimeout)
-      resizeTimeout = setTimeout(() => {
-        setIsMobile(window.innerWidth < 768)
-      }, 100)
+      setIsMobile(window.innerWidth < 768)
     }
-    
     checkMobile()
-    window.addEventListener('resize', checkMobile, { passive: true })
-    return () => {
-      clearTimeout(resizeTimeout)
-      window.removeEventListener('resize', checkMobile)
-    }
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Optimized intersection observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry.isIntersecting)
+        if (entry.isIntersecting) {
+          setIsInView(true)
+        }
       },
-      { 
-        threshold: 0.1,
-        rootMargin: '50px'
-      }
+      { threshold: 0.1 }
     )
 
     if (ref.current) {
@@ -75,18 +63,15 @@ export function ParallaxSection({ children, offset = 50 }: ParallaxSectionProps)
       style={{ 
         y: isMobile ? mobileY : y,
         opacity: isMobile ? mobileOpacity : 1,
-        scale: isMobile ? mobileScale : 1,
-        willChange: 'transform, opacity',
-        transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden',
+        scale: isMobile ? mobileScale : 1
       }} 
-      className={`performance-optimized ${isMobile ? 'parallax-mobile' : ''} ${isInView ? 'visible' : ''}`}
+      className={`${isMobile ? 'parallax-mobile' : ''} ${isInView ? 'visible' : ''}`}
       animate={isMobile && isInView ? {
-        y: [0, -5, 0],
-        scale: [1, 1.01, 1],
+        y: [0, -2, 0],
+        scale: [1, 1.005, 1],
       } : {}}
       transition={{
-        duration: 4,
+        duration: 6,
         repeat: Number.POSITIVE_INFINITY,
         ease: "easeInOut",
       }}

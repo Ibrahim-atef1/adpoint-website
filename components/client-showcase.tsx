@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
-import { useMobileAnimations, mobileAnimationVariants, mobileTransitions } from "@/hooks/use-mobile-animations"
+import { MobileScrollAnimation } from "@/components/mobile-scroll-animation"
 import { Sparkles, Zap, Star } from "lucide-react"
 // FadeUp component replaced with motion.div
 
@@ -25,7 +25,16 @@ const clients = [
 export function ClientShowcase() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const { isMobile, staggerDelay } = useMobileAnimations()
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   return (
     <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
@@ -270,17 +279,11 @@ export function ClientShowcase() {
               { number: "150%", label: "Average Growth" },
               { number: "8+", label: "Years Experience" },
             ].map((stat, index) => (
-              <motion.div
+              <MobileScrollAnimation
                 key={stat.label}
+                animationType="scale-in"
+                staggerDelay={index * 0.1}
                 className="text-center group"
-                initial="initial"
-                whileInView="animate"
-                viewport={{ once: true }}
-                variants={mobileAnimationVariants.scaleIn}
-                transition={{ 
-                  ...mobileTransitions.normal, 
-                  delay: index * staggerDelay 
-                }}
               >
                 <div className="bg-gray-900/30 hover:bg-gray-800/50 border border-gray-800 hover:border-red-600/30 rounded-xl p-4 sm:p-6 transition-all duration-300 group-hover:scale-105">
                   <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 group-hover:text-red-400 transition-colors">
@@ -290,7 +293,7 @@ export function ClientShowcase() {
                     {stat.label}
                   </div>
                 </div>
-              </motion.div>
+              </MobileScrollAnimation>
             ))}
           </div>
         </motion.div>

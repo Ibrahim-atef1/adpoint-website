@@ -5,14 +5,13 @@ import { ChevronDown, Sparkles, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRef, useEffect, useState } from "react"
 import { useForm } from "@/contexts/FormContext"
-import { useMobileAnimations } from "@/hooks/use-mobile-animations"
 
 export function HeroSection() {
   const ref = useRef<HTMLElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hasScrolled, setHasScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const { setIsNavigating } = useForm()
-  const { isMobile, reducedMotion } = useMobileAnimations()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -22,59 +21,39 @@ export function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
   useEffect(() => {
-    // Skip mouse tracking on mobile for better performance
-    if (isMobile) {
-      const startHero = () => setHasScrolled(true)
-      startHero()
-      return
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
     }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
 
-    // Desktop mouse tracking with RAF throttling
-    let rafId: number | null = null
-    let lastMouseX = 0
-    let lastMouseY = 0
-    
     const handleMouseMove = (e: MouseEvent) => {
-      if (rafId || reducedMotion) return
-      
-      rafId = requestAnimationFrame(() => {
-        const rect = ref.current?.getBoundingClientRect()
-        if (rect) {
-          const newX = (e.clientX - rect.left - rect.width / 2) / 20
-          const newY = (e.clientY - rect.top - rect.height / 2) / 20
-          
-          // Only update if position changed significantly
-          const threshold = isMobile ? 2 : 0.5
-          if (Math.abs(newX - lastMouseX) > threshold || Math.abs(newY - lastMouseY) > threshold) {
-            setMousePosition({ x: newX, y: newY })
-            lastMouseX = newX
-            lastMouseY = newY
-          }
-        }
-        rafId = null
-      })
+      const rect = ref.current?.getBoundingClientRect()
+      if (rect) {
+        setMousePosition({
+          x: (e.clientX - rect.left - rect.width / 2) / 20,
+          y: (e.clientY - rect.top - rect.height / 2) / 20,
+        })
+      }
     }
 
     // Start hero animations immediately on load
     const startHero = () => setHasScrolled(true)
 
     const heroElement = ref.current
-    if (heroElement && !isMobile) {
+    if (heroElement) {
       heroElement.addEventListener("mousemove", handleMouseMove, { passive: true })
     }
-    
     // Trigger once after mount
     startHero()
-    
     return () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId)
-      }
       if (heroElement) {
         heroElement.removeEventListener("mousemove", handleMouseMove)
       }
+      window.removeEventListener('resize', checkMobile)
     }
-  }, [isMobile, reducedMotion])
+  }, [])
 
   const scrollToAbout = () => {
     setIsNavigating(true)
@@ -85,131 +64,80 @@ export function HeroSection() {
   }
 
   return (
-    <section 
-      ref={ref} 
-      className="relative min-h-screen flex items-center justify-center overflow-hidden noise-overlay hero-section"
-      style={{
-        willChange: 'transform',
-        transform: 'translate3d(0, 0, 0)',
-      }}
-    >
+    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden noise-overlay">
       <div className="absolute inset-0 bg-background" />
       <motion.div
-        className="absolute inset-0 animate-gradient will-change-transform"
+        className="absolute inset-0 will-change-transform"
         style={{
           background: `
             radial-gradient(circle at 20% 80%, rgba(194, 69, 51, 0.15) 0%, transparent 50%),
             radial-gradient(circle at 80% 20%, rgba(194, 69, 51, 0.1) 0%, transparent 50%),
             radial-gradient(circle at 40% 40%, rgba(194, 69, 51, 0.05) 0%, transparent 50%)
           `,
-          transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
-        }}
-        animate={{
-          background: [
-            `radial-gradient(circle at 20% 80%, rgba(194, 69, 51, 0.15) 0%, transparent 50%),
-             radial-gradient(circle at 80% 20%, rgba(194, 69, 51, 0.1) 0%, transparent 50%),
-             radial-gradient(circle at 40% 40%, rgba(194, 69, 51, 0.05) 0%, transparent 50%)`,
-            `radial-gradient(circle at 80% 20%, rgba(194, 69, 51, 0.15) 0%, transparent 50%),
-             radial-gradient(circle at 20% 80%, rgba(194, 69, 51, 0.1) 0%, transparent 50%),
-             radial-gradient(circle at 60% 60%, rgba(194, 69, 51, 0.05) 0%, transparent 50%)`,
-            `radial-gradient(circle at 40% 60%, rgba(194, 69, 51, 0.15) 0%, transparent 50%),
-             radial-gradient(circle at 60% 40%, rgba(194, 69, 51, 0.1) 0%, transparent 50%),
-             radial-gradient(circle at 20% 20%, rgba(194, 69, 51, 0.05) 0%, transparent 50%)`,
-          ],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "linear",
+          transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`,
         }}
       />
 
       <div className="absolute inset-0">
-        {/* Desktop particles */}
-        {[...Array(2)].map((_, i) => (
+        {/* Desktop particles - reduced for performance */}
+        {[...Array(1)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-primary/10 rounded-full hidden md:block"
             style={{
-              left: `${30 + i * 40}%`,
-              top: `${40 + i * 20}%`,
+              left: `${50}%`,
+              top: `${50}%`,
             }}
             animate={{
-              y: [-10, 10, -10],
-              opacity: [0.05, 0.2, 0.05],
+              y: [-5, 5, -5],
+              opacity: [0.05, 0.15, 0.05],
             }}
             transition={{
-              duration: 8 + i * 4,
+              duration: 6,
               repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
-              delay: i * 2,
             }}
           />
         ))}
         
-        {/* Mobile enhanced particles */}
-        {isMobile && [...Array(8)].map((_, i) => (
+        {/* Mobile particles - reduced for performance */}
+        {isMobile && [...Array(3)].map((_, i) => (
           <motion.div
             key={`mobile-${i}`}
             className="absolute w-1 h-1 bg-primary/20 rounded-full md:hidden"
             style={{
-              left: `${10 + i * 12}%`,
-              top: `${20 + (i % 3) * 25}%`,
+              left: `${20 + i * 30}%`,
+              top: `${30 + (i % 2) * 40}%`,
             }}
             animate={{
-              y: [-15, 15, -15],
-              x: [-5, 5, -5],
-              opacity: [0.1, 0.4, 0.1],
-              scale: [0.8, 1.2, 0.8],
+              y: [-8, 8, -8],
+              opacity: [0.1, 0.3, 0.1],
             }}
             transition={{
-              duration: 6 + i * 0.5,
+              duration: 4 + i * 0.5,
               repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
-              delay: i * 0.3,
+              delay: i * 0.5,
             }}
           />
         ))}
         
-        {/* Mobile floating icons */}
+        {/* Mobile floating icons - reduced for performance */}
         {isMobile && (
-          <>
-            <motion.div
-              className="absolute top-20 left-8 text-primary/30 md:hidden"
-              animate={{
-                y: [-10, 10, -10],
-                rotate: [0, 5, 0],
-                opacity: [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-                delay: 0.5,
-              }}
-            >
-              <Sparkles className="w-6 h-6" />
-            </motion.div>
-            <motion.div
-              className="absolute top-32 right-12 text-primary/15 md:hidden"
-              animate={reducedMotion ? {} : {
-                y: [3, -3, 3],
-                opacity: [0.1, 0.2, 0.1],
-              }}
-              transition={{
-                duration: 12,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-                delay: 2,
-              }}
-              style={{
-                willChange: 'transform, opacity',
-                transform: 'translate3d(0, 0, 0)',
-              }}
-            >
-              <Zap className="w-3 h-3" />
-            </motion.div>
-          </>
+          <motion.div
+            className="absolute top-20 left-8 text-primary/30 md:hidden"
+            animate={{
+              y: [-5, 5, -5],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          >
+            <Sparkles className="w-6 h-6" />
+          </motion.div>
         )}
       </div>
 
@@ -219,16 +147,12 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={hasScrolled ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.9 }}
           transition={{ duration: 0.9, ease: "easeOut", delay: 0.4 }}
-          className="space-y-6 sm:space-y-8 performance-optimized"
-          style={{ willChange: 'transform, opacity' }}
+          className="space-y-6 sm:space-y-8"
         >
           <motion.h1
-            className="font-display font-bold text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-balance leading-tight performance-optimized hero-title"
+            className="font-display font-bold text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-balance leading-tight"
             style={{
-              transform: isMobile 
-                ? 'translate3d(0, 0, 0)' 
-                : `translate3d(${mousePosition.x * 0.1}px, ${mousePosition.y * 0.1}px, 0)`,
-              willChange: isMobile ? 'auto' : 'transform',
+              transform: `translate(${mousePosition.x * 0.1}px, ${mousePosition.y * 0.1}px)`,
             }}
           >
             <motion.span
@@ -306,10 +230,10 @@ export function HeroSection() {
                 <motion.span
                   className="flex items-center space-x-2"
                   animate={isMobile ? {
-                    scale: [1, 1.02, 1],
+                    scale: [1, 1.01, 1],
                   } : {}}
                   transition={{
-                    duration: 2,
+                    duration: 3,
                     repeat: Number.POSITIVE_INFINITY,
                     ease: "easeInOut"
                   }}
@@ -333,16 +257,16 @@ export function HeroSection() {
                 </motion.span>
               </Button>
               
-              {/* Mobile button glow effect */}
+              {/* Mobile button glow effect - reduced for performance */}
               {isMobile && (
                 <motion.div
                   className="absolute inset-0 bg-primary/20 rounded-xl blur-xl -z-10"
                   animate={{
-                    scale: [1, 1.1, 1],
-                    opacity: [0.3, 0.6, 0.3],
+                    scale: [1, 1.05, 1],
+                    opacity: [0.3, 0.5, 0.3],
                   }}
                   transition={{
-                    duration: 3,
+                    duration: 4,
                     repeat: Number.POSITIVE_INFINITY,
                     ease: "easeInOut"
                   }}
@@ -361,8 +285,8 @@ export function HeroSection() {
         onClick={scrollToAbout}
       >
         <motion.div
-          animate={{ y: [0, 15, 0] }}
-          transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
           className="flex flex-col items-center space-y-2 text-muted-foreground hover:text-primary transition-colors"
         >
           <span className="text-sm font-medium">Scroll to begin</span>

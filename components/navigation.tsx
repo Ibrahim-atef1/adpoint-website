@@ -71,6 +71,9 @@ export function Navigation() {
               height={240}
               className="h-24 sm:h-32 md:h-40 lg:h-48 w-auto"
               priority
+              quality={90}
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
           </motion.div>
 
@@ -118,14 +121,9 @@ export function Navigation() {
           </div>
 
           <button
-            className="md:hidden text-white hover:text-red-700 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center mobile-touch-target"
+            className="md:hidden text-white hover:text-red-700 transition-colors p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            onTouchStart={(e) => e.preventDefault()}
             aria-label="Toggle mobile menu"
-            style={{
-              willChange: 'transform, color',
-              transform: 'translate3d(0, 0, 0)',
-            }}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -137,15 +135,8 @@ export function Navigation() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ 
-                duration: 0.4, 
-                ease: "easeInOut" 
-              }}
-              className="md:hidden bg-black/95 backdrop-blur-md border-t border-white/10 mobile-performance"
-              style={{
-                willChange: 'transform, opacity',
-                transform: 'translate3d(0, 0, 0)',
-              }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="md:hidden bg-black/95 backdrop-blur-md border-t border-white/10"
             >
               <div className="px-4 py-6 space-y-2">
                 <button
@@ -154,11 +145,7 @@ export function Navigation() {
                     scrollToSection("about")
                     setIsMobileMenuOpen(false)
                   }}
-                  className="block w-full text-left text-white hover:text-red-700 transition-colors font-medium py-4 mobile-touch-target"
-                  style={{
-                    willChange: 'color',
-                    transform: 'translate3d(0, 0, 0)',
-                  }}
+                  className="block w-full text-left text-white hover:text-red-700 transition-colors font-medium py-4 min-h-[44px] flex items-center"
                 >
                   About Us
                 </button>

@@ -7,10 +7,10 @@ export function LoadingOverlay() {
   const [show, setShow] = useState(true)
 
   useEffect(() => {
-    const onReady = () => setTimeout(() => setShow(false), 1200)
+    const onReady = () => setTimeout(() => setShow(false), 800)
     if (document.readyState === "complete") onReady()
     else window.addEventListener("load", onReady, { once: true })
-    const fallback = setTimeout(() => setShow(false), 2200)
+    const fallback = setTimeout(() => setShow(false), 1500)
     return () => {
       window.removeEventListener("load", onReady)
       clearTimeout(fallback)
@@ -25,7 +25,7 @@ export function LoadingOverlay() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black"
         >
           <div className="text-center space-y-4">
             <motion.h1
@@ -65,3 +65,5 @@ export function LoadingOverlay() {
     </AnimatePresence>
   )
 }
+
+

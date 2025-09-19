@@ -5,7 +5,6 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Palette, Globe, Megaphone, BarChart3, Camera, Code, Sparkles, Zap } from "lucide-react"
 import { motion } from "framer-motion"
-import { useMobileAnimations, mobileAnimationVariants, mobileTransitions } from "@/hooks/use-mobile-animations"
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
@@ -22,12 +21,16 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
-  const [isTapped, setIsTapped] = useState(false)
-  const { isMobile, reducedMotion, animationDuration, staggerDelay, ease } = useMobileAnimations()
+  const [isMobile, setIsMobile] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!cardRef.current) return
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -38,139 +41,91 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       { threshold: 0.3 }
     )
 
-    observer.observe(cardRef.current)
+    if (cardRef.current) {
+      observer.observe(cardRef.current)
+    }
 
     return () => {
-      observer.disconnect()
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current)
+      }
+      window.removeEventListener('resize', checkMobile)
     }
   }, [])
 
-  // Mobile-optimized interaction logic
-  const shouldShowDescription = isMobile ? (isInView || isTapped) : isHovered
-  const shouldShowGlow = isMobile ? (isInView || isTapped) : isHovered
-  
-  const handleTap = (e: React.TouchEvent | React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (isMobile) {
-      setIsTapped(!isTapped)
-    }
-  }
+  // On mobile, show description when in view. On desktop, show on hover
+  const shouldShowDescription = typeof window !== 'undefined' && window.innerWidth < 768 ? isInView : isHovered
 
   return (
     <motion.div 
       ref={cardRef}
-      className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 group cursor-pointer performance-optimized"
-      onMouseEnter={() => !isMobile && setIsHovered(true)}
-      onMouseLeave={() => !isMobile && setIsHovered(false)}
-      onTouchStart={isMobile ? handleTap : undefined}
-      onClick={isMobile ? handleTap : undefined}
+      className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
-        willChange: 'transform, opacity',
-        transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden',
-        minHeight: isMobile ? '44px' : 'auto', // Ensure touch target size
+        boxShadow: shouldShowDescription 
+          ? `0 0 30px ${color}40, 0 0 60px ${color}20, 0 0 90px ${color}10` 
+          : `0 0 15px ${color}20, 0 0 30px ${color}10`,
+        willChange: 'transform, box-shadow',
+        transform: 'translate3d(0, 0, 0)'
       }}
-      whileHover={!isMobile ? { 
-        scale: 1.02,
-        transition: { duration: 0.3, ease: "easeOut" }
-      } : {}}
-      whileTap={isMobile ? {
-        scale: 0.98,
-        transition: { duration: 0.1 }
-      } : {}}
-      animate={isMobile && isInView && !reducedMotion ? {
-        scale: [1, 1.005, 1],
-        y: [0, -1, 0],
+      animate={isMobile && isInView ? {
+        scale: [1, 1.01, 1],
+        y: [0, -2, 0],
       } : {}}
       transition={{
-        duration: isMobile ? 8 : 3,
-        repeat: isMobile && isInView && !reducedMotion ? Number.POSITIVE_INFINITY : 0,
+        duration: 4,
+        repeat: Number.POSITIVE_INFINITY,
         ease: "easeInOut",
-        delay: isMobile && isInView && !reducedMotion ? Math.random() * 3 : 0,
+        delay: 0.5,
       }}
     >
-      {/* Underglow effect - enhanced for mobile */}
-      <motion.div 
-        className="absolute inset-0 rounded-2xl"
+      {/* Underglow effect */}
+      <div 
+        className="absolute inset-0 rounded-2xl opacity-0 transition-all duration-1000"
         style={{
-          background: `radial-gradient(circle at center, ${color}${isMobile ? '20' : '15'}, transparent 70%)`,
-        }}
-        animate={{
-          scale: shouldShowDescription ? (isMobile ? 1.1 : 1.1) : 1,
-          opacity: shouldShowDescription ? (isMobile ? 1 : 1) : (isMobile ? 0.3 : 0),
-        }}
-        transition={{
-          duration: isMobile ? 0.3 : 0.3,
-          ease: "easeOut"
+          background: `radial-gradient(circle at center, ${color}15, transparent 70%)`,
+          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+          opacity: isHovered ? 1 : 0
         }}
       />
 
-      {/* Additional mobile glow effect */}
-      {isMobile && (
-        <motion.div 
-          className="absolute inset-0 rounded-2xl"
-          style={{
-            background: `linear-gradient(135deg, ${color}15, transparent 50%, ${color}10)`,
-            boxShadow: `inset 0 0 20px ${color}20`,
-          }}
+      {/* Mobile floating elements - reduced for performance */}
+      {isMobile && isInView && (
+        <motion.div
+          className="absolute top-4 right-4 text-primary/30"
           animate={{
-            opacity: isInView ? 0.6 : 0.2,
+            y: [-2, 2, -2],
+            opacity: [0.3, 0.5, 0.3],
           }}
           transition={{
-            duration: 0.5,
-            ease: "easeOut"
+            duration: 8,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+            delay: 0.5,
           }}
-        />
+        >
+          <Sparkles className="w-3 h-3" />
+        </motion.div>
       )}
-
-       {/* Mobile floating elements - ultra-simplified for performance */}
-       {isMobile && isInView && !reducedMotion && (
-         <motion.div
-           className="absolute top-4 right-4 text-primary/15"
-           animate={{
-             y: [-1, 1, -1],
-             opacity: [0.1, 0.2, 0.1],
-           }}
-           transition={{
-             duration: 10,
-             repeat: Number.POSITIVE_INFINITY,
-             ease: "easeInOut",
-             delay: 2,
-           }}
-           style={{
-             willChange: 'transform, opacity',
-             transform: 'translate3d(0, 0, 0)',
-           }}
-         >
-           <Sparkles className="w-3 h-3" />
-         </motion.div>
-       )}
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
         <motion.div 
           className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative"
           style={{
             background: `linear-gradient(135deg, ${color}30, ${color}50)`,
-            boxShadow: isMobile ? 
-              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)` :
-              `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
+            boxShadow: `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
             transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}
           animate={isMobile && isInView ? {
-            scale: [1, 1.05, 1],
-            rotate: [0, 2, 0],
-            boxShadow: [
-              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)`,
-              `0 0 40px ${color}80, inset 0 1px 0 rgba(255,255,255,0.4)`,
-              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)`
-            ],
+            scale: [1, 1.02, 1],
+            rotate: [0, 1, 0],
           } : {}}
           transition={{
-            duration: 2.5,
+            duration: 4,
             repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
-            delay: 0.3,
+            delay: 0.5,
           }}
         >
           {/* Animated background ring */}
@@ -212,13 +167,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         <motion.h3 
           className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4"
           animate={isMobile && isInView ? {
-            scale: [1, 1.02, 1],
+            scale: [1, 1.01, 1],
           } : {}}
           transition={{
-            duration: 2,
+            duration: 4,
             repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
-            delay: 0.5,
+            delay: 0.8,
           }}
         >
           {title}
@@ -240,82 +195,48 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
 export function ServicesCarousel() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { isMobile, reducedMotion } = useMobileAnimations()
-  const [hasError, setHasError] = useState(false)
-
-  // Error boundary for mobile
-  if (hasError) {
-    return (
-      <section className="relative w-full min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center text-white">
-          <h2 className="text-2xl font-bold mb-4">Services</h2>
-          <p className="text-gray-400">Loading services...</p>
-        </div>
-      </section>
-    )
-  }
 
   useEffect(() => {
-    try {
-      if (!sectionRef.current) return
+    if (!sectionRef.current || !containerRef.current) return
 
-      const viewportWidth = window.innerWidth
-      const isMobileDevice = viewportWidth < 768
-      
-      if (isMobileDevice || isMobile || reducedMotion) {
-        // On mobile, use simplified animations or no animations
-        return
-      }
-
-      if (!containerRef.current) return
-
-      const cardWidth = 500 + 40 // card width + gap
-      const totalCards = 6
-      const totalScrollDistance = (totalCards - 1) * cardWidth
-
-      const ctx = gsap.context(() => {
-        // Batch DOM operations for better performance
-        const centerOffset = (viewportWidth - cardWidth) / 2
-        gsap.set(containerRef.current, { 
-          x: centerOffset,
-          willChange: 'transform',
-          transform: 'translate3d(0, 0, 0)',
-          backfaceVisibility: 'hidden'
-        })
-
-        // Calculate scroll distance to show all cards
-        const scrollDistance = totalScrollDistance
-
-        gsap.to(containerRef.current, {
-          x: centerOffset - scrollDistance,
-          ease: "none",
-          force3D: true, // Force GPU acceleration
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            pin: true,
-            scrub: 1,
-            start: "top top",
-            end: () => `+=${scrollDistance}`,
-            // Optimize refresh rate
-            refreshPriority: 0,
-            onUpdate: () => {
-              // Batch any additional updates
-              requestAnimationFrame(() => {
-                // Any additional DOM updates here
-              })
-            }
-          },
-        })
-      }, sectionRef)
-
-      return () => {
-        ctx.revert()
-      }
-    } catch (error) {
-      console.warn('Services carousel error:', error)
-      setHasError(true)
+    const viewportWidth = window.innerWidth
+    const isMobile = viewportWidth < 768
+    
+    if (isMobile) {
+      // On mobile, stack cards vertically without horizontal scroll
+      return
     }
-  }, [isMobile, reducedMotion])
+
+    const cardWidth = 500 + 40 // card width + gap
+    const totalCards = 6
+    const totalScrollDistance = (totalCards - 1) * cardWidth
+
+
+    const ctx = gsap.context(() => {
+      // Center the first card by offsetting the container
+      const centerOffset = (viewportWidth - cardWidth) / 2
+      gsap.set(containerRef.current, { x: centerOffset })
+
+      // Calculate scroll distance to show all cards
+      const scrollDistance = totalScrollDistance
+
+      gsap.to(containerRef.current, {
+        x: centerOffset - scrollDistance,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          pin: true,
+          scrub: 1,
+          start: "top top",
+          end: () => `+=${scrollDistance}`,
+        },
+      })
+    }, sectionRef)
+
+    return () => {
+      ctx.revert()
+    }
+  }, [])
 
   const services = [
     { 
@@ -358,27 +279,25 @@ export function ServicesCarousel() {
 
   return (
     <section ref={sectionRef} className="relative w-full min-h-screen bg-black">
-      {/* Mobile floating background elements */}
+      {/* Mobile floating background elements - reduced for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
+        {[...Array(2)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-primary/20 rounded-full md:hidden"
             style={{
-              left: `${10 + i * 15}%`,
-              top: `${20 + (i % 3) * 25}%`,
+              left: `${30 + i * 40}%`,
+              top: `${40 + i * 20}%`,
             }}
             animate={{
-              y: [-20, 20, -20],
-              x: [-10, 10, -10],
-              opacity: [0.1, 0.4, 0.1],
-              scale: [0.5, 1.5, 0.5],
+              y: [-10, 10, -10],
+              opacity: [0.1, 0.3, 0.1],
             }}
             transition={{
-              duration: 8 + i * 0.5,
+              duration: 6 + i * 2,
               repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
-              delay: i * 0.8,
+              delay: i * 1,
             }}
           />
         ))}
@@ -389,10 +308,10 @@ export function ServicesCarousel() {
         <motion.h2 
           className="text-3xl sm:text-4xl font-bold text-white text-center font-display"
           animate={{
-            scale: [1, 1.02, 1],
+            scale: [1, 1.01, 1],
           }}
           transition={{
-            duration: 4,
+            duration: 6,
             repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
           }}
