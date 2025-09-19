@@ -12,6 +12,15 @@ interface MobileOptimization {
 }
 
 export function useMobileOptimization(): MobileOptimization {
+  const [optimization, setOptimization] = useState<MobileOptimization>({
+    isMobile: false,
+    isLowEnd: false,
+    reducedMotion: false,
+    particleCount: 12,
+    animationQuality: 'high',
+    shouldDeferJS: false,
+  })
+
   // Safe fallback for SSR
   if (typeof window === 'undefined') {
     return {
@@ -24,26 +33,18 @@ export function useMobileOptimization(): MobileOptimization {
     }
   }
 
-  const [optimization, setOptimization] = useState<MobileOptimization>({
-    isMobile: false,
-    isLowEnd: false,
-    reducedMotion: false,
-    particleCount: 12,
-    animationQuality: 'high',
-    shouldDeferJS: false,
-  })
-
   const detectDevice = useCallback(() => {
     // Safety check for SSR
     if (typeof window === 'undefined') return
     
-    const isMobile = window.innerWidth < 768
-    const isLowEnd = isMobile && (
-      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) || 
-      ((navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4) ||
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-    )
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    try {
+      const isMobile = window.innerWidth < 768
+      const isLowEnd = isMobile && (
+        (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) || 
+        ((navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4) ||
+        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      )
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     
     // Determine particle count based on device capability - more aggressive for mobile
     let particleCount = 12
@@ -64,14 +65,26 @@ export function useMobileOptimization(): MobileOptimization {
     // Determine if JS should be deferred
     const shouldDeferJS = isMobile && isLowEnd
 
-    setOptimization({
-      isMobile,
-      isLowEnd,
-      reducedMotion,
-      particleCount,
-      animationQuality,
-      shouldDeferJS,
-    })
+      setOptimization({
+        isMobile,
+        isLowEnd,
+        reducedMotion,
+        particleCount,
+        animationQuality,
+        shouldDeferJS,
+      })
+    } catch (error) {
+      console.warn('Mobile optimization detection failed:', error)
+      // Set safe defaults on error
+      setOptimization({
+        isMobile: false,
+        isLowEnd: false,
+        reducedMotion: false,
+        particleCount: 12,
+        animationQuality: 'high',
+        shouldDeferJS: false,
+      })
+    }
   }, [])
 
   useEffect(() => {
@@ -83,14 +96,26 @@ export function useMobileOptimization(): MobileOptimization {
       
       const handleResize = () => {
         // Throttle resize detection
-        setTimeout(detectDevice, 100)
+        setTimeout(() => {
+          try {
+            detectDevice()
+          } catch (error) {
+            console.warn('Resize detection failed:', error)
+          }
+        }, 100)
       }
       
       window.addEventListener('resize', handleResize, { passive: true })
       
       // Listen for reduced motion preference changes
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-      const handleMotionChange = () => detectDevice()
+      const handleMotionChange = () => {
+        try {
+          detectDevice()
+        } catch (error) {
+          console.warn('Motion change detection failed:', error)
+        }
+      }
       mediaQuery.addEventListener('change', handleMotionChange)
       
       return () => {
@@ -98,7 +123,7 @@ export function useMobileOptimization(): MobileOptimization {
         mediaQuery.removeEventListener('change', handleMotionChange)
       }
     } catch (error) {
-      console.warn('Mobile optimization detection failed:', error)
+      console.warn('Mobile optimization setup failed:', error)
     }
   }, [detectDevice])
 

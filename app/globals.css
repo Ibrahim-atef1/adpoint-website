@@ -328,10 +328,38 @@
   }
 }
 
-/* Critical above-the-fold styles */
-.hero-gradient {
-  background: linear-gradient(135deg, rgba(185, 28, 28, 0.1) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(185, 28, 28, 0.05) 100%);
-}
+        /* Critical above-the-fold styles */
+        .hero-gradient {
+          background: linear-gradient(135deg, rgba(185, 28, 28, 0.1) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(185, 28, 28, 0.05) 100%);
+        }
+
+        /* Modern browser optimizations */
+        .modern-browser {
+          /* Enable modern CSS features */
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .modern-browser * {
+          /* Use modern CSS properties */
+          scroll-behavior: smooth;
+        }
+
+        .modern-browser .performance-optimized {
+          /* Enhanced performance for modern browsers */
+          will-change: transform, opacity;
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Legacy browser fallbacks */
+        .legacy-browser .performance-optimized {
+          /* Simplified animations for legacy browsers */
+          will-change: auto;
+          transform: none;
+        }
 
 /* Optimize animations for better performance */
 @media (prefers-reduced-motion: reduce) {

@@ -13,6 +13,8 @@ import { DeferredAnalytics } from "@/components/deferred-analytics"
 import { PerformanceOptimizationSummary } from "@/components/performance-optimization-summary"
 import { MobilePerformanceBoost } from "@/components/mobile-performance-boost"
 import { ErrorBoundary } from "@/components/error-boundary"
+import { ModernJSDetector } from "@/components/modern-js-detector"
+import { MobileFallback } from "@/components/mobile-fallback"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -23,8 +25,6 @@ const poppins = Poppins({
   preload: true,
   fallback: ["system-ui", "arial"],
   adjustFontFallback: false,
-  // Mobile-specific optimizations
-  variable: "--font-poppins",
 })
 
 const montserrat = Montserrat({
@@ -35,8 +35,6 @@ const montserrat = Montserrat({
   preload: true,
   fallback: ["system-ui", "arial"],
   adjustFontFallback: false,
-  // Mobile-specific optimizations
-  variable: "--font-montserrat",
 })
 
 export const metadata: Metadata = {
@@ -68,24 +66,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${montserrat.variable}`}>
       <head>
-        {/* Resource hints for better performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
-        
-        {/* Preload critical resources for LCP optimization */}
-        <link rel="preload" href="/logo/Transparent Logo.png" as="image" type="image/png" />
-        <link rel="preload" href="/logo/Transparent Logo.png" as="image" media="(max-width: 768px)" type="image/webp" />
-        
-        {/* Preload critical fonts with mobile optimization */}
-        <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="https://fonts.gstatic.com/s/montserrat/v26/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXpsog.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        
-        {/* Mobile-specific resource hints */}
+        {/* Optimized resource hints - non-blocking */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
+        
+        {/* Preconnect only for critical resources */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Preload only critical LCP resources */}
+        <link rel="preload" href="/logo/Transparent Logo.png" as="image" type="image/png" />
         
         {/* Mobile performance hints */}
         <meta name="format-detection" content="telephone=no" />
@@ -252,12 +242,15 @@ export default function RootLayout({
         </div>
 
         <FormProvider>
-          <ErrorBoundary>
-            <div className="relative z-10">
-              <LoadingOverlay />
-              <Suspense fallback={null}>{children}</Suspense>
-            </div>
-          </ErrorBoundary>
+          <ModernJSDetector />
+          <MobileFallback>
+            <ErrorBoundary>
+              <div className="relative z-10">
+                <LoadingOverlay />
+                <Suspense fallback={null}>{children}</Suspense>
+              </div>
+            </ErrorBoundary>
+          </MobileFallback>
           <FloatingCTA />
           <Suspense fallback={null}>
             <Analytics />
