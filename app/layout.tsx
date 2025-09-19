@@ -8,13 +8,11 @@ import { LoadingOverlay } from "@/components/loading-overlay"
 import { FloatingCTA } from "@/components/floating-cta"
 import { FormProvider } from "@/contexts/FormContext"
 import { PerformanceMonitor } from "@/components/performance-monitor"
-import { MobilePerformanceSummary } from "@/components/mobile-performance-summary"
 import { DeferredAnalytics } from "@/components/deferred-analytics"
 import { PerformanceOptimizationSummary } from "@/components/performance-optimization-summary"
-import { MobilePerformanceBoost } from "@/components/mobile-performance-boost"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { ModernJSDetector } from "@/components/modern-js-detector"
-import { MobileFallback } from "@/components/mobile-fallback"
+import { PerformanceOptimizer } from "@/components/performance-optimizer"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -244,13 +242,12 @@ export default function RootLayout({
         <FormProvider>
           <LoadingOverlay />
           <ModernJSDetector />
-          <MobileFallback>
-            <ErrorBoundary>
-              <div className="relative z-10">
-                <Suspense fallback={null}>{children}</Suspense>
-              </div>
-            </ErrorBoundary>
-          </MobileFallback>
+          <PerformanceOptimizer />
+          <ErrorBoundary>
+            <div className="relative z-10">
+              <Suspense fallback={null}>{children}</Suspense>
+            </div>
+          </ErrorBoundary>
           <FloatingCTA />
           <Suspense fallback={null}>
             <Analytics />
@@ -267,17 +264,11 @@ export default function RootLayout({
                 <PerformanceMonitor />
               </ErrorBoundary>
               <ErrorBoundary>
-                <MobilePerformanceSummary />
-              </ErrorBoundary>
-              <ErrorBoundary>
                 <PerformanceOptimizationSummary />
               </ErrorBoundary>
-          <ErrorBoundary>
-            <MobilePerformanceBoost />
-          </ErrorBoundary>
-        </>
-      )}
-    </FormProvider>
+            </>
+          )}
+        </FormProvider>
       </body>
     </html>
   )

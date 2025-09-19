@@ -5,8 +5,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Palette, Globe, Megaphone, BarChart3, Camera, Code, Sparkles, Zap } from "lucide-react"
 import { motion } from "framer-motion"
-import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
-import { MobileOptimizedGSAP } from "./mobile-optimized-gsap"
+import { useMobileAnimations, mobileAnimationVariants, mobileTransitions } from "@/hooks/use-mobile-animations"
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
@@ -24,7 +23,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
   const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
   const [isTapped, setIsTapped] = useState(false)
-  const { isMobile, isLowEnd, reducedMotion, animationQuality } = useMobileOptimization()
+  const { isMobile, reducedMotion, animationDuration, staggerDelay, ease } = useMobileAnimations()
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -241,7 +240,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
 export function ServicesCarousel() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { isMobile, isLowEnd, reducedMotion } = useMobileOptimization()
+  const { isMobile, reducedMotion } = useMobileAnimations()
   const [hasError, setHasError] = useState(false)
 
   // Error boundary for mobile
@@ -316,7 +315,7 @@ export function ServicesCarousel() {
       console.warn('Services carousel error:', error)
       setHasError(true)
     }
-  }, [isMobile, isLowEnd, reducedMotion])
+  }, [isMobile, reducedMotion])
 
   const services = [
     { 

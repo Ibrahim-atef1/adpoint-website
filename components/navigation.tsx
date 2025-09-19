@@ -6,13 +6,11 @@ import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useForm } from "@/contexts/FormContext"
-import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { setIsNavigating } = useForm()
-  const { isMobile, isLowEnd } = useMobileOptimization()
 
   useEffect(() => {
     let ticking = false
@@ -140,7 +138,7 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ 
-                duration: isMobile ? 0.3 : 0.6, 
+                duration: 0.4, 
                 ease: "easeInOut" 
               }}
               className="md:hidden bg-black/95 backdrop-blur-md border-t border-white/10 mobile-performance"

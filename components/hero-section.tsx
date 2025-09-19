@@ -5,14 +5,14 @@ import { ChevronDown, Sparkles, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRef, useEffect, useState } from "react"
 import { useForm } from "@/contexts/FormContext"
-import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
+import { useMobileAnimations } from "@/hooks/use-mobile-animations"
 
 export function HeroSection() {
   const ref = useRef<HTMLElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hasScrolled, setHasScrolled] = useState(false)
   const { setIsNavigating } = useForm()
-  const { isMobile, isLowEnd, reducedMotion, animationQuality } = useMobileOptimization()
+  const { isMobile, reducedMotion } = useMobileAnimations()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -44,7 +44,7 @@ export function HeroSection() {
           const newY = (e.clientY - rect.top - rect.height / 2) / 20
           
           // Only update if position changed significantly
-          const threshold = animationQuality === 'low' ? 2 : 0.5
+          const threshold = isMobile ? 2 : 0.5
           if (Math.abs(newX - lastMouseX) > threshold || Math.abs(newY - lastMouseY) > threshold) {
             setMousePosition({ x: newX, y: newY })
             lastMouseX = newX
@@ -74,7 +74,7 @@ export function HeroSection() {
         heroElement.removeEventListener("mousemove", handleMouseMove)
       }
     }
-  }, [isMobile, reducedMotion, animationQuality])
+  }, [isMobile, reducedMotion])
 
   const scrollToAbout = () => {
     setIsNavigating(true)

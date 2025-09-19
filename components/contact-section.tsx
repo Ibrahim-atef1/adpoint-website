@@ -9,23 +9,14 @@ import { Mail, Phone, MapPin, X, Calendar, Sparkles, Zap, Star } from "lucide-re
 import { Button } from "@/components/ui/button"
 import { SchedulingForm } from "@/components/scheduling-form"
 import { useForm } from "@/contexts/FormContext"
-import { MobileScrollAnimation } from "@/components/mobile-scroll-animation"
+import { useMobileAnimations, mobileAnimationVariants, mobileTransitions } from "@/hooks/use-mobile-animations"
 
 export function ContactSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isSchedulingOpen, setIsSchedulingOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const { isMobile, staggerDelay } = useMobileAnimations()
   const { setIsFormOpen } = useForm()
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
 
   const contactInfo = [
@@ -210,11 +201,17 @@ export function ContactSection() {
           {/* Contact Information Cards */}
           <div ref={ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {contactInfo.map((info, index) => (
-              <MobileScrollAnimation
+              <motion.div
                 key={info.title}
-                animationType="fade-in"
-                staggerDelay={index * 0.1}
                 className="text-center p-6 sm:p-8 bg-card/50 border border-border/50 rounded-xl hover:border-primary/50 transition-all duration-300 hover-lift backdrop-blur-sm relative overflow-hidden"
+                initial="initial"
+                whileInView="animate"
+                viewport={{ once: true }}
+                variants={mobileAnimationVariants.fadeInUp}
+                transition={{ 
+                  ...mobileTransitions.normal, 
+                  delay: index * staggerDelay 
+                }}
               >
                 {/* Mobile floating elements for each card */}
                 {isMobile && (
@@ -296,7 +293,7 @@ export function ContactSection() {
                 </motion.p>
                 
                 <p className="text-xs sm:text-sm text-muted-foreground">{info.description}</p>
-              </MobileScrollAnimation>
+              </motion.div>
             ))}
           </div>
         </div>

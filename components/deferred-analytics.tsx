@@ -1,15 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
+import { useMobileAnimations } from "@/hooks/use-mobile-animations"
 
 export function DeferredAnalytics() {
   const [shouldLoad, setShouldLoad] = useState(false)
-  const { isMobile, isLowEnd, shouldDeferJS } = useMobileOptimization()
+  const { isMobile, reducedMotion } = useMobileAnimations()
 
   useEffect(() => {
     // Defer analytics loading based on device capability
-    const delay = isMobile && isLowEnd ? 5000 : isMobile ? 3000 : 1000
+    const delay = isMobile ? 3000 : 1000
     
     const timer = setTimeout(() => {
       setShouldLoad(true)
@@ -33,7 +33,7 @@ export function DeferredAnalytics() {
         document.removeEventListener(event, loadOnInteraction)
       })
     }
-  }, [isMobile, isLowEnd])
+  }, [isMobile])
 
   if (!shouldLoad) {
     return null

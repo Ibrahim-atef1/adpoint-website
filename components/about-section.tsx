@@ -3,27 +3,17 @@
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import { Target, Lightbulb, Users, TrendingUp, Sparkles, Zap } from "lucide-react"
-import { MobileScrollAnimation } from "@/components/mobile-scroll-animation"
-// FadeUp component replaced with motion.div
+import { useMobileAnimations, mobileAnimationVariants, mobileTransitions } from "@/hooks/use-mobile-animations"
 
 export function AboutSection() {
   const ref = useRef(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const { isMobile, animationDuration, staggerDelay } = useMobileAnimations()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   })
 
   const y = useTransform(scrollYProgress, [0, 1], [100, -100])
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   const stats = [
     { icon: Target, label: "Projects Completed", value: "500+" },
@@ -150,11 +140,17 @@ export function AboutSection() {
           >
             <div className="grid grid-cols-2 gap-4 sm:gap-6">
               {stats.map((stat, index) => (
-                <MobileScrollAnimation
+                <motion.div
                   key={stat.label}
-                  animationType="scale-in"
-                  staggerDelay={index * 0.1}
                   className="bg-card border border-border rounded-xl p-4 sm:p-6 lg:p-8 text-center hover:border-primary/50 transition-all duration-500 group relative overflow-hidden"
+                  initial="initial"
+                  whileInView="animate"
+                  viewport={{ once: true }}
+                  variants={mobileAnimationVariants.scaleIn}
+                  transition={{ 
+                    ...mobileTransitions.normal, 
+                    delay: index * staggerDelay 
+                  }}
                 >
                   {/* Mobile glow effect */}
                   {isMobile && (
@@ -224,7 +220,7 @@ export function AboutSection() {
                       }}
                     />
                   )}
-                </MobileScrollAnimation>
+                </motion.div>
               ))}
             </div>
           </motion.div>

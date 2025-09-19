@@ -252,11 +252,6 @@
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .mobile-optimized {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-  
   /* Mobile-specific performance optimizations */
   .mobile-performance {
     will-change: transform, opacity;
@@ -266,22 +261,11 @@
     -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Reduce animation complexity on mobile */
-  .mobile-simple-animation {
-    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-  }
-  
   /* Optimize touch targets */
   .mobile-touch-target {
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
-  }
-  
-  /* Reduce particle effects on mobile */
-  .mobile-reduced-effects {
-    opacity: 0.6;
-    filter: blur(0.5px);
   }
   
   /* Optimize scrolling performance */
@@ -292,17 +276,17 @@
   }
   
   /* Mobile-specific performance boosts */
-    * {
-      -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
     
   /* Optimize text rendering on mobile */
-    body {
+  body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;

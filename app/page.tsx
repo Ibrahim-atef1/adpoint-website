@@ -1,22 +1,26 @@
 import dynamic from "next/dynamic"
-import { FormProvider } from "@/contexts/FormContext"
-import { PerformanceLazyLoader } from "@/components/performance-lazy-loader"
+import { MobileLazyLoader } from "@/components/mobile-lazy-loader"
+import { MobileHeroSection } from "@/components/mobile-hero-section"
+import { MobileServicesSection } from "@/components/mobile-services-section"
+import { MobileFooter } from "@/components/mobile-footer"
+
 // Critical above-the-fold components (load immediately)
 const Navigation = dynamic(() => import("@/components/navigation").then(m => m.Navigation), { 
   loading: () => <div className="h-16 bg-black" />
 })
 
+// Desktop components (lazy load)
 const HeroSection = dynamic(() => import("@/components/hero-section").then(m => m.HeroSection), { 
-  loading: () => <div className="min-h-screen bg-background" />
-})
-
-// Below-the-fold components (lazy load)
-const AboutSection = dynamic(() => import("@/components/about-section").then(m => m.AboutSection), {
   loading: () => <div className="min-h-screen bg-background" />
 })
 
 const ServicesCarousel = dynamic(() => import("@/components/services-carousel").then(m => m.ServicesCarousel), { 
   loading: () => <div className="min-h-screen bg-black" />
+})
+
+// Below-the-fold components (lazy load)
+const AboutSection = dynamic(() => import("@/components/about-section").then(m => m.AboutSection), {
+  loading: () => <div className="min-h-screen bg-background" />
 })
 
 const PortfolioSection = dynamic(() => import("@/components/portfolio-section").then(m => m.PortfolioSection), { 
@@ -41,50 +45,94 @@ const ParallaxSection = dynamic(() => import("@/components/parallax-section").th
 
 export default function HomePage() {
   return (
-    <FormProvider>
-      <main className="min-h-screen bg-background text-foreground">
-        <Navigation />
+    <>
+      {/* Desktop Version */}
+      <div className="hidden md:block">
+        <main className="min-h-screen bg-background text-foreground">
+          <Navigation />
 
-        <div id="hero">
-          <HeroSection />
-        </div>
+          <div id="hero">
+            <HeroSection />
+          </div>
 
-        <PerformanceLazyLoader>
-          <div id="about">
-            <ParallaxSection offset={30}>
+          <MobileLazyLoader>
+            <div id="about">
+              <ParallaxSection offset={30}>
+                <AboutSection />
+              </ParallaxSection>
+            </div>
+          </MobileLazyLoader>
+
+          <MobileLazyLoader>
+            <div id="services">
+              <ServicesCarousel />
+            </div>
+          </MobileLazyLoader>
+
+          <MobileLazyLoader>
+            <div id="portfolio">
+              <PortfolioSection />
+            </div>
+          </MobileLazyLoader>
+
+          <MobileLazyLoader>
+            <ClientShowcase />
+          </MobileLazyLoader>
+
+          <MobileLazyLoader>
+            <div id="contact">
+              <ParallaxSection offset={20}>
+                <ContactSection />
+              </ParallaxSection>
+            </div>
+          </MobileLazyLoader>
+
+          <MobileLazyLoader>
+            <WorkingCinematicFooter />
+          </MobileLazyLoader>
+        </main>
+      </div>
+
+      {/* Mobile Version */}
+      <div className="md:hidden">
+        <main className="min-h-screen bg-background text-foreground">
+          <Navigation />
+
+          <div id="hero">
+            <MobileHeroSection />
+          </div>
+
+          <MobileLazyLoader>
+            <div id="about">
               <AboutSection />
-            </ParallaxSection>
-          </div>
-        </PerformanceLazyLoader>
+            </div>
+          </MobileLazyLoader>
 
-        <PerformanceLazyLoader>
-          <div id="services">
-            <ServicesCarousel />
-          </div>
-        </PerformanceLazyLoader>
+          <MobileLazyLoader>
+            <div id="services">
+              <MobileServicesSection />
+            </div>
+          </MobileLazyLoader>
 
-        <PerformanceLazyLoader>
-          <div id="portfolio">
-            <PortfolioSection />
-          </div>
-        </PerformanceLazyLoader>
+          <MobileLazyLoader>
+            <div id="portfolio">
+              <PortfolioSection />
+            </div>
+          </MobileLazyLoader>
 
-        <PerformanceLazyLoader>
-          <ClientShowcase />
-        </PerformanceLazyLoader>
+          <MobileLazyLoader>
+            <ClientShowcase />
+          </MobileLazyLoader>
 
-        <PerformanceLazyLoader>
-          <div id="contact">
-            <ParallaxSection offset={20}>
+          <MobileLazyLoader>
+            <div id="contact">
               <ContactSection />
-            </ParallaxSection>
-          </div>
-        </PerformanceLazyLoader>
+            </div>
+          </MobileLazyLoader>
 
-        <PerformanceLazyLoader>
-          <WorkingCinematicFooter />
-        </PerformanceLazyLoader>
-      </main>
-    </FormProvider>
+          <MobileFooter />
+        </main>
+      </div>
+    </>
   )
 }
