@@ -25,6 +25,10 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@/components', 'framer-motion', 'lucide-react'],
   },
+  // Modern JavaScript support
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   webpack: (config, { dev, isServer }) => {
     // Optimize for production
     if (!dev && !isServer) {
@@ -32,14 +36,39 @@ const nextConfig = {
         ...config.optimization,
         splitChunks: {
           chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
           cacheGroups: {
             default: false,
             vendors: false,
+            // Split large libraries into separate chunks
+            gsap: {
+              name: 'gsap',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/](gsap|framer-motion)[\\/]/,
+              priority: 30,
+              enforce: true
+            },
+            react: {
+              name: 'react',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+              priority: 25,
+              enforce: true
+            },
+            ui: {
+              name: 'ui',
+              chunks: 'all',
+              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react)[\\/]/,
+              priority: 20,
+              enforce: true
+            },
             vendor: {
               name: 'vendor',
               chunks: 'all',
-              test: /node_modules/,
-              priority: 20
+              test: /[\\/]node_modules[\\/]/,
+              priority: 15,
+              enforce: true
             },
             common: {
               name: 'common',
@@ -50,6 +79,10 @@ const nextConfig = {
               enforce: true
             }
           }
+        },
+        // Optimize runtime chunk
+        runtimeChunk: {
+          name: 'runtime'
         }
       }
     }

@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Palette, Globe, Megaphone, BarChart3, Camera, Code, Sparkles, Zap } from "lucide-react"
 import { motion } from "framer-motion"
 import { useMobileOptimization } from "@/hooks/use-mobile-optimization"
+import { MobileOptimizedGSAP } from "./mobile-optimized-gsap"
 
 // Register ScrollTrigger plugin
 if (typeof window !== "undefined") {
@@ -214,15 +215,16 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
 export function ServicesCarousel() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const { isMobile, isLowEnd, reducedMotion } = useMobileOptimization()
 
   useEffect(() => {
     if (!sectionRef.current || !containerRef.current) return
 
     const viewportWidth = window.innerWidth
-    const isMobile = viewportWidth < 768
+    const isMobileDevice = viewportWidth < 768
     
-    if (isMobile) {
-      // On mobile, stack cards vertically without horizontal scroll
+    if (isMobileDevice || isMobile || reducedMotion) {
+      // On mobile, use simplified animations or no animations
       return
     }
 
@@ -232,9 +234,14 @@ export function ServicesCarousel() {
 
 
     const ctx = gsap.context(() => {
-      // Center the first card by offsetting the container
+      // Batch DOM operations for better performance
       const centerOffset = (viewportWidth - cardWidth) / 2
-      gsap.set(containerRef.current, { x: centerOffset })
+      gsap.set(containerRef.current, { 
+        x: centerOffset,
+        willChange: 'transform',
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden'
+      })
 
       // Calculate scroll distance to show all cards
       const scrollDistance = totalScrollDistance
@@ -242,12 +249,21 @@ export function ServicesCarousel() {
       gsap.to(containerRef.current, {
         x: centerOffset - scrollDistance,
         ease: "none",
+        force3D: true, // Force GPU acceleration
         scrollTrigger: {
           trigger: sectionRef.current,
           pin: true,
           scrub: 1,
           start: "top top",
           end: () => `+=${scrollDistance}`,
+          // Optimize refresh rate
+          refreshPriority: 0,
+          onUpdate: () => {
+            // Batch any additional updates
+            requestAnimationFrame(() => {
+              // Any additional DOM updates here
+            })
+          }
         },
       })
     }, sectionRef)
@@ -255,7 +271,7 @@ export function ServicesCarousel() {
     return () => {
       ctx.revert()
     }
-  }, [])
+  }, [isMobile, isLowEnd, reducedMotion])
 
   const services = [
     { 

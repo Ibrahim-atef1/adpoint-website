@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic"
 import { FormProvider } from "@/contexts/FormContext"
+import { PerformanceLazyLoader } from "@/components/performance-lazy-loader"
 
 // Critical above-the-fold components (load immediately)
 const Navigation = dynamic(() => import("@/components/navigation").then(m => m.Navigation), { 
@@ -49,29 +50,41 @@ export default function HomePage() {
           <HeroSection />
         </div>
 
-        <div id="about">
-          <ParallaxSection offset={30}>
-            <AboutSection />
-          </ParallaxSection>
-        </div>
+        <PerformanceLazyLoader>
+          <div id="about">
+            <ParallaxSection offset={30}>
+              <AboutSection />
+            </ParallaxSection>
+          </div>
+        </PerformanceLazyLoader>
 
-        <div id="services">
-          <ServicesCarousel />
-        </div>
+        <PerformanceLazyLoader>
+          <div id="services">
+            <ServicesCarousel />
+          </div>
+        </PerformanceLazyLoader>
 
-        <div id="portfolio">
-          <PortfolioSection />
-        </div>
+        <PerformanceLazyLoader>
+          <div id="portfolio">
+            <PortfolioSection />
+          </div>
+        </PerformanceLazyLoader>
 
-        <ClientShowcase />
+        <PerformanceLazyLoader>
+          <ClientShowcase />
+        </PerformanceLazyLoader>
 
-        <div id="contact">
-          <ParallaxSection offset={20}>
-            <ContactSection />
-          </ParallaxSection>
-        </div>
+        <PerformanceLazyLoader>
+          <div id="contact">
+            <ParallaxSection offset={20}>
+              <ContactSection />
+            </ParallaxSection>
+          </div>
+        </PerformanceLazyLoader>
 
-        <WorkingCinematicFooter />
+        <PerformanceLazyLoader>
+          <WorkingCinematicFooter />
+        </PerformanceLazyLoader>
       </main>
     </FormProvider>
   )

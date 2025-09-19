@@ -85,7 +85,14 @@ export function HeroSection() {
   }
 
   return (
-    <section ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden noise-overlay">
+    <section 
+      ref={ref} 
+      className="relative min-h-screen flex items-center justify-center overflow-hidden noise-overlay hero-section"
+      style={{
+        willChange: 'transform',
+        transform: 'translate3d(0, 0, 0)',
+      }}
+    >
       <div className="absolute inset-0 bg-background" />
       <motion.div
         className="absolute inset-0 animate-gradient will-change-transform"
@@ -235,7 +242,7 @@ export function HeroSection() {
           style={{ willChange: 'transform, opacity' }}
         >
           <motion.h1
-            className="font-display font-bold text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-balance leading-tight performance-optimized"
+            className="font-display font-bold text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-balance leading-tight performance-optimized hero-title"
             style={{
               transform: isMobile 
                 ? 'translate3d(0, 0, 0)' 
