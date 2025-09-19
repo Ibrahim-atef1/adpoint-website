@@ -1,24 +1,34 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useEffect, useRef, useState } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { Palette, Globe, Megaphone, BarChart3, Camera, Code, Sparkles, Zap } from "lucide-react"
 import { motion } from "framer-motion"
-import { Palette, Globe, Megaphone, BarChart3, Camera, Code, Sparkles } from "lucide-react"
 import { useMobileAnimations, mobileAnimationVariants, mobileTransitions } from "@/hooks/use-mobile-animations"
+
+// Register ScrollTrigger plugin
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 interface ServiceCardProps {
   title: string
   icon: React.ReactNode
   color: string
   description: string
-  index: number
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description, index }) => {
+const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, description }) => {
+  const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
   const [isTapped, setIsTapped] = useState(false)
-  const { isMobile, animationDuration, staggerDelay } = useMobileAnimations()
+  const { isMobile, reducedMotion, animationDuration, staggerDelay, ease } = useMobileAnimations()
+  const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (!cardRef.current) return
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -28,50 +38,75 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
       { threshold: 0.3 }
     )
 
-    const card = document.getElementById(`service-card-${index}`)
-    if (card) {
-      observer.observe(card)
-    }
+    observer.observe(cardRef.current)
 
     return () => {
-      if (card) {
-        observer.unobserve(card)
-      }
+      observer.disconnect()
     }
-  }, [index])
+  }, [])
 
-  const shouldShowDescription = isMobile ? (isInView || isTapped) : isInView
+  // Mobile-optimized interaction logic
+  const shouldShowDescription = isMobile ? (isInView || isTapped) : isHovered
+  const shouldShowGlow = isMobile ? (isInView || isTapped) : isHovered
+  
+  const handleTap = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (isMobile) {
+      setIsTapped(!isTapped)
+    }
+  }
 
   return (
-    <motion.div
-      id={`service-card-${index}`}
-      className="relative w-full bg-black/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-800 group cursor-pointer min-h-[300px] sm:min-h-[400px]"
-      onClick={() => setIsTapped(!isTapped)}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+    <motion.div 
+      ref={cardRef}
+      className="relative w-full max-w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 group cursor-pointer performance-optimized"
+      onMouseEnter={() => !isMobile && setIsHovered(true)}
+      onMouseLeave={() => !isMobile && setIsHovered(false)}
+      onTouchStart={isMobile ? handleTap : undefined}
+      onClick={isMobile ? handleTap : undefined}
       style={{
         willChange: 'transform, opacity',
         transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden'
+        backfaceVisibility: 'hidden',
+        minHeight: isMobile ? '44px' : 'auto', // Ensure touch target size
+      }}
+      whileHover={!isMobile ? { 
+        scale: 1.02,
+        transition: { duration: 0.3, ease: "easeOut" }
+      } : {}}
+      whileTap={isMobile ? {
+        scale: 0.98,
+        transition: { duration: 0.1 }
+      } : {}}
+      animate={isMobile && isInView && !reducedMotion ? {
+        scale: [1, 1.005, 1],
+        y: [0, -1, 0],
+      } : {}}
+      transition={{
+        duration: isMobile ? 8 : 3,
+        repeat: isMobile && isInView && !reducedMotion ? Number.POSITIVE_INFINITY : 0,
+        ease: "easeInOut",
+        delay: isMobile && isInView && !reducedMotion ? Math.random() * 3 : 0,
       }}
     >
-      {/* Enhanced Glow Effect */}
+      {/* Underglow effect - enhanced for mobile */}
       <motion.div 
         className="absolute inset-0 rounded-2xl"
         style={{
-          background: `radial-gradient(circle at center, ${color}20, transparent 70%)`,
+          background: `radial-gradient(circle at center, ${color}${isMobile ? '20' : '15'}, transparent 70%)`,
         }}
         animate={{
-          scale: shouldShowDescription ? 1.1 : 1,
-          opacity: shouldShowDescription ? 1 : 0.4,
+          scale: shouldShowDescription ? (isMobile ? 1.1 : 1.1) : 1,
+          opacity: shouldShowDescription ? (isMobile ? 1 : 1) : (isMobile ? 0.3 : 0),
         }}
         transition={{
-          duration: 0.3,
+          duration: isMobile ? 0.3 : 0.3,
           ease: "easeOut"
         }}
       />
 
-      {/* Additional Mobile Glow Layer */}
+      {/* Additional mobile glow effect */}
       {isMobile && (
         <motion.div 
           className="absolute inset-0 rounded-2xl"
@@ -80,7 +115,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
             boxShadow: `inset 0 0 20px ${color}20`,
           }}
           animate={{
-            opacity: isInView ? 0.8 : 0.3,
+            opacity: isInView ? 0.6 : 0.2,
           }}
           transition={{
             duration: 0.5,
@@ -89,36 +124,38 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         />
       )}
 
-      {/* Floating Elements */}
-      {isMobile && isInView && (
-        <motion.div
-          className="absolute top-4 right-4 text-primary/20"
-          animate={{
-            y: [-2, 2, -2],
-            opacity: [0.1, 0.3, 0.1],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: index * 0.2,
-          }}
-          style={{
-            willChange: 'transform, opacity',
-            transform: 'translate3d(0, 0, 0)',
-          }}
-        >
-          <Sparkles className="w-4 h-4" />
-        </motion.div>
-      )}
+       {/* Mobile floating elements - ultra-simplified for performance */}
+       {isMobile && isInView && !reducedMotion && (
+         <motion.div
+           className="absolute top-4 right-4 text-primary/15"
+           animate={{
+             y: [-1, 1, -1],
+             opacity: [0.1, 0.2, 0.1],
+           }}
+           transition={{
+             duration: 10,
+             repeat: Number.POSITIVE_INFINITY,
+             ease: "easeInOut",
+             delay: 2,
+           }}
+           style={{
+             willChange: 'transform, opacity',
+             transform: 'translate3d(0, 0, 0)',
+           }}
+         >
+           <Sparkles className="w-3 h-3" />
+         </motion.div>
+       )}
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full p-6 text-center">
-        {/* Icon */}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
         <motion.div 
-          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-6 relative"
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative"
           style={{
             background: `linear-gradient(135deg, ${color}30, ${color}50)`,
-            boxShadow: `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)`,
+            boxShadow: isMobile ? 
+              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)` :
+              `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
+            transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}
           animate={isMobile && isInView ? {
             scale: [1, 1.05, 1],
@@ -130,26 +167,56 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
             ],
           } : {}}
           transition={{
-            duration: 3,
-            repeat: Infinity,
+            duration: 2.5,
+            repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
             delay: 0.3,
           }}
         >
-          <div className="text-2xl sm:text-3xl text-white">
+          {/* Animated background ring */}
+          <div 
+            className="absolute inset-0 rounded-full opacity-0 transition-all duration-1000"
+            style={{
+              background: `conic-gradient(from 0deg, ${color}40, transparent, ${color}20)`,
+              transform: isHovered ? 'rotate(360deg)' : 'rotate(0deg)',
+              opacity: isHovered ? 1 : 0
+            }}
+          />
+          
+          {/* Floating particles around icon */}
+          {isHovered && [...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 rounded-full animate-ping"
+              style={{
+                background: color,
+                left: `${20 + i * 20}%`,
+                top: `${20 + i * 20}%`,
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: '1.5s'
+              }}
+            />
+          ))}
+          
+          <div 
+            className="text-xl sm:text-2xl transition-all duration-1000 relative z-10" 
+            style={{ 
+              transform: isHovered ? 'scale(1.1) rotate(-5deg)' : 'scale(1) rotate(0deg)',
+              filter: isHovered ? 'drop-shadow(0 0 8px currentColor)' : 'none'
+            }}
+          >
             {icon}
           </div>
         </motion.div>
         
-        {/* Title */}
         <motion.h3 
-          className="text-xl sm:text-2xl font-bold text-white mb-4"
+          className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4"
           animate={isMobile && isInView ? {
             scale: [1, 1.02, 1],
           } : {}}
           transition={{
             duration: 2,
-            repeat: Infinity,
+            repeat: Number.POSITIVE_INFINITY,
             ease: "easeInOut",
             delay: 0.5,
           }}
@@ -157,25 +224,98 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
           {title}
         </motion.h3>
 
-        {/* Description */}
-        <motion.div 
-          className={`transition-all duration-500 ${
-            shouldShowDescription ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-        >
-          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+        {/* Hover Description */}
+        <div className={`transition-all duration-1000 ${shouldShowDescription ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="bg-black/60 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/10">
+            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-sm">
               {description}
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   )
 }
 
 export function MobileServicesSection() {
-  const { isMobile, animationDuration, staggerDelay } = useMobileAnimations()
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { isMobile, reducedMotion } = useMobileAnimations()
+  const [hasError, setHasError] = useState(false)
+
+  // Error boundary for mobile
+  if (hasError) {
+    return (
+      <section className="relative w-full min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-bold mb-4">Services</h2>
+          <p className="text-gray-400">Loading services...</p>
+        </div>
+      </section>
+    )
+  }
+
+  useEffect(() => {
+    try {
+      if (!sectionRef.current) return
+
+      const viewportWidth = window.innerWidth
+      const isMobileDevice = viewportWidth < 768
+      
+      if (isMobileDevice || isMobile || reducedMotion) {
+        // On mobile, use simplified animations or no animations
+        return
+      }
+
+      if (!containerRef.current) return
+
+      const cardWidth = 500 + 40 // card width + gap
+      const totalCards = 6
+      const totalScrollDistance = (totalCards - 1) * cardWidth
+
+      const ctx = gsap.context(() => {
+        // Batch DOM operations for better performance
+        const centerOffset = (viewportWidth - cardWidth) / 2
+        gsap.set(containerRef.current, { 
+          x: centerOffset,
+          willChange: 'transform',
+          transform: 'translate3d(0, 0, 0)',
+          backfaceVisibility: 'hidden'
+        })
+
+        // Calculate scroll distance to show all cards
+        const scrollDistance = totalScrollDistance
+
+        gsap.to(containerRef.current, {
+          x: centerOffset - scrollDistance,
+          ease: "none",
+          force3D: true, // Force GPU acceleration
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            pin: true,
+            scrub: 1,
+            start: "top top",
+            end: () => `+=${scrollDistance}`,
+            // Optimize refresh rate
+            refreshPriority: 0,
+            onUpdate: () => {
+              // Batch any additional updates
+              requestAnimationFrame(() => {
+                // Any additional DOM updates here
+              })
+            }
+          },
+        })
+      }, sectionRef)
+
+      return () => {
+        ctx.revert()
+      }
+    } catch (error) {
+      console.warn('Services carousel error:', error)
+      setHasError(true)
+    }
+  }, [isMobile, reducedMotion])
 
   const services = [
     { 
@@ -217,13 +357,13 @@ export function MobileServicesSection() {
   ]
 
   return (
-    <section className="relative w-full min-h-screen bg-black py-16 sm:py-24">
-      {/* Background Elements */}
+    <section ref={sectionRef} className="relative w-full min-h-screen bg-black">
+      {/* Mobile floating background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-primary/20 rounded-full"
+            className="absolute w-1 h-1 bg-primary/20 rounded-full md:hidden"
             style={{
               left: `${10 + i * 15}%`,
               top: `${20 + (i % 3) * 25}%`,
@@ -236,7 +376,7 @@ export function MobileServicesSection() {
             }}
             transition={{
               duration: 8 + i * 0.5,
-              repeat: Infinity,
+              repeat: Number.POSITIVE_INFINITY,
               ease: "easeInOut",
               delay: i * 0.8,
             }}
@@ -245,47 +385,49 @@ export function MobileServicesSection() {
       </div>
 
       {/* Header */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
+      <div className="absolute top-8 left-0 right-0 z-20 px-4">
         <motion.h2 
-          className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6"
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true }}
-          variants={mobileAnimationVariants.fadeInUp}
-          transition={mobileTransitions.normal}
+          className="text-3xl sm:text-4xl font-bold text-white text-center font-display"
+          animate={{
+            scale: [1, 1.02, 1],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
         >
           Our Services
         </motion.h2>
-        <motion.p
-          className="text-lg text-gray-400 max-w-2xl mx-auto"
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true }}
-          variants={mobileAnimationVariants.fadeInUp}
-          transition={{ ...mobileTransitions.normal, delay: 0.2 }}
-        >
-          Comprehensive digital solutions tailored to your business needs
-        </motion.p>
       </div>
 
-      {/* Services Grid */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.title}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true }}
-              variants={mobileAnimationVariants.fadeInUp}
-              transition={{ 
-                ...mobileTransitions.normal, 
-                delay: index * staggerDelay 
-              }}
-            >
-              <ServiceCard {...service} index={index} />
-            </motion.div>
-          ))}
+      {/* Cards Container */}
+      <div className="relative min-h-screen flex items-center overflow-hidden pt-20 sm:pt-24">
+        {/* Desktop: Horizontal scroll */}
+        <div className="hidden md:block w-full h-full">
+          <div 
+            ref={containerRef} 
+            className="flex flex-nowrap items-center"
+            style={{ 
+              width: 'max-content',
+              transform: 'translate3d(0, 0, 0)'
+            }}
+          >
+            {services.map((service, i) => (
+              <div key={i} className="px-5">
+                <ServiceCard {...service} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile: Vertical stack */}
+        <div className="md:hidden w-full px-4">
+          <div className="grid grid-cols-1 gap-6 max-w-sm mx-auto">
+            {services.map((service, i) => (
+              <ServiceCard key={i} {...service} />
+            ))}
+          </div>
         </div>
       </div>
     </section>

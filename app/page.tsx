@@ -2,7 +2,6 @@ import dynamic from "next/dynamic"
 import { MobileLazyLoader } from "@/components/mobile-lazy-loader"
 import { MobileHeroSection } from "@/components/mobile-hero-section"
 import { MobileServicesSection } from "@/components/mobile-services-section"
-import { MobileFooter } from "@/components/mobile-footer"
 
 // Critical above-the-fold components (load immediately)
 const Navigation = dynamic(() => import("@/components/navigation").then(m => m.Navigation), { 
@@ -102,35 +101,37 @@ export default function HomePage() {
             <MobileHeroSection />
           </div>
 
-          <MobileLazyLoader>
+          <MobileLazyLoader fallback={<div className="min-h-screen bg-black" />}>
             <div id="about">
-              <AboutSection />
+              <ParallaxSection offset={30}>
+                <AboutSection />
+              </ParallaxSection>
             </div>
           </MobileLazyLoader>
 
-          <MobileLazyLoader>
+          <MobileLazyLoader fallback={<div className="min-h-screen bg-black" />}>
             <div id="services">
               <MobileServicesSection />
             </div>
           </MobileLazyLoader>
 
-          <MobileLazyLoader>
+          <MobileLazyLoader fallback={<div className="min-h-screen bg-black" />}>
             <div id="portfolio">
               <PortfolioSection />
             </div>
           </MobileLazyLoader>
 
-          <MobileLazyLoader>
+          <MobileLazyLoader fallback={<div className="min-h-screen bg-background" />}>
             <ClientShowcase />
           </MobileLazyLoader>
 
-          <MobileLazyLoader>
+          <MobileLazyLoader fallback={<div className="min-h-screen bg-background" />}>
             <div id="contact">
               <ContactSection />
             </div>
           </MobileLazyLoader>
 
-          <MobileFooter />
+          <WorkingCinematicFooter />
         </main>
       </div>
     </>
