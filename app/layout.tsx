@@ -242,11 +242,11 @@ export default function RootLayout({
         </div>
 
         <FormProvider>
+          <LoadingOverlay />
           <ModernJSDetector />
           <MobileFallback>
             <ErrorBoundary>
               <div className="relative z-10">
-                <LoadingOverlay />
                 <Suspense fallback={null}>{children}</Suspense>
               </div>
             </ErrorBoundary>

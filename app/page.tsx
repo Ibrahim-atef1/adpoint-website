@@ -1,8 +1,6 @@
 import dynamic from "next/dynamic"
 import { FormProvider } from "@/contexts/FormContext"
 import { PerformanceLazyLoader } from "@/components/performance-lazy-loader"
-import { SimpleHeroSection } from "@/components/simple-hero-section"
-
 // Critical above-the-fold components (load immediately)
 const Navigation = dynamic(() => import("@/components/navigation").then(m => m.Navigation), { 
   loading: () => <div className="h-16 bg-black" />
@@ -48,7 +46,7 @@ export default function HomePage() {
         <Navigation />
 
         <div id="hero">
-          <SimpleHeroSection />
+          <HeroSection />
         </div>
 
         <PerformanceLazyLoader>
