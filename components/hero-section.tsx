@@ -21,21 +21,41 @@ export function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
   useEffect(() => {
-    // Check if mobile
+    // Check if mobile - use passive detection
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = ref.current?.getBoundingClientRect()
-      if (rect) {
-        setMousePosition({
-          x: (e.clientX - rect.left - rect.width / 2) / 20,
-          y: (e.clientY - rect.top - rect.height / 2) / 20,
-        })
+      const isMobileDevice = window.innerWidth < 768
+      if (isMobileDevice !== isMobile) {
+        setIsMobile(isMobileDevice)
       }
+    }
+    
+    // Initial check
+    checkMobile()
+    
+    // Throttled resize handler to reduce main thread work
+    let resizeTimeout: NodeJS.Timeout
+    const throttledResize = () => {
+      clearTimeout(resizeTimeout)
+      resizeTimeout = setTimeout(checkMobile, 100)
+    }
+    
+    window.addEventListener('resize', throttledResize, { passive: true })
+
+    // Optimized mouse move handler with throttling
+    let mouseTimeout: NodeJS.Timeout
+    const handleMouseMove = (e: MouseEvent) => {
+      if (mouseTimeout) return
+      
+      mouseTimeout = setTimeout(() => {
+        const rect = ref.current?.getBoundingClientRect()
+        if (rect) {
+          setMousePosition({
+            x: (e.clientX - rect.left - rect.width / 2) / 20,
+            y: (e.clientY - rect.top - rect.height / 2) / 20,
+          })
+        }
+        mouseTimeout = null
+      }, 16) // ~60fps throttling
     }
 
     // Start hero animations immediately on load
@@ -45,15 +65,19 @@ export function HeroSection() {
     if (heroElement) {
       heroElement.addEventListener("mousemove", handleMouseMove, { passive: true })
     }
+    
     // Trigger once after mount
     startHero()
+    
     return () => {
+      clearTimeout(resizeTimeout)
+      clearTimeout(mouseTimeout)
+      window.removeEventListener('resize', throttledResize)
       if (heroElement) {
         heroElement.removeEventListener("mousemove", handleMouseMove)
       }
-      window.removeEventListener('resize', checkMobile)
     }
-  }, [])
+  }, [isMobile])
 
   const scrollToAbout = () => {
     setIsNavigating(true)

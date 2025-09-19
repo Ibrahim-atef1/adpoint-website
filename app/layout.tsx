@@ -28,6 +28,12 @@ export const metadata: Metadata = {
   title: "AdPoint — Creative Marketing Agency",
   description: "Premium digital marketing agency specializing in creative campaigns, branding, and web development.",
   generator: "v0.app",
+  robots: "index, follow",
+  openGraph: {
+    title: "AdPoint — Creative Marketing Agency",
+    description: "Premium digital marketing agency specializing in creative campaigns, branding, and web development.",
+    type: "website",
+  },
 }
 
 export const viewport: Viewport = {
@@ -35,6 +41,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: "#ef4444",
+  userScalable: true,
 }
 
 
@@ -46,26 +53,48 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${montserrat.variable}`}>
       <head>
+        {/* Resource hints for better performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
+        
+        {/* Critical inline script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Ensure page loads from top
-              window.addEventListener('load', function() {
-                window.scrollTo(0, 0);
-              });
-              // Also scroll to top on page show (back button, etc.)
-              window.addEventListener('pageshow', function() {
-                window.scrollTo(0, 0);
-              });
-              
-              // Suppress hydration warnings for browser extensions
-              const originalError = console.error;
-              console.error = (...args) => {
-                if (typeof args[0] === 'string' && args[0].includes('Hydration')) {
-                  return;
+              // Critical path optimization - defer non-essential scripts
+              (function() {
+                // Suppress hydration warnings for browser extensions
+                const originalError = console.error;
+                console.error = (...args) => {
+                  if (typeof args[0] === 'string' && args[0].includes('Hydration')) {
+                    return;
+                  }
+                  originalError.apply(console, args);
+                };
+                
+                // Defer scroll behavior to avoid blocking render
+                if (window.requestIdleCallback) {
+                  requestIdleCallback(function() {
+                    window.addEventListener('load', function() {
+                      window.scrollTo(0, 0);
+                    });
+                    window.addEventListener('pageshow', function() {
+                      window.scrollTo(0, 0);
+                    });
+                  });
+                } else {
+                  // Fallback for browsers without requestIdleCallback
+                  setTimeout(function() {
+                    window.addEventListener('load', function() {
+                      window.scrollTo(0, 0);
+                    });
+                    window.addEventListener('pageshow', function() {
+                      window.scrollTo(0, 0);
+                    });
+                  }, 1);
                 }
-                originalError.apply(console, args);
-              };
+              })();
             `,
           }}
         />
@@ -84,7 +113,9 @@ export default function RootLayout({
             <Suspense fallback={null}>{children}</Suspense>
           </div>
           <FloatingCTA />
-          <Analytics />
+          <Suspense fallback={null}>
+            <Analytics />
+          </Suspense>
         </FormProvider>
       </body>
     </html>
