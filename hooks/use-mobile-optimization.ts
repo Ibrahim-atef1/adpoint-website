@@ -30,12 +30,12 @@ export function useMobileOptimization(): MobileOptimization {
     )
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     
-    // Determine particle count based on device capability
+    // Determine particle count based on device capability - more aggressive for mobile
     let particleCount = 12
     if (isMobile && isLowEnd) {
-      particleCount = 4
+      particleCount = 2
     } else if (isMobile) {
-      particleCount = 6
+      particleCount = 4
     }
     
     // Determine animation quality

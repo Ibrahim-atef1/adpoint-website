@@ -126,60 +126,60 @@
 
 /* Mobile scroll animations - optimized for performance */
 .mobile-fade-in {
-  opacity: 0;
-  transform: translateY(30px);
+    opacity: 0;
+    transform: translateY(30px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: opacity, transform;
-}
-
-.mobile-fade-in.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.mobile-slide-in-left {
-  opacity: 0;
+    }
+    
+    .mobile-fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .mobile-slide-in-left {
+      opacity: 0;
   transform: translateX(-50px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: opacity, transform;
-}
-
-.mobile-slide-in-left.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.mobile-slide-in-right {
-  opacity: 0;
+    }
+    
+    .mobile-slide-in-left.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .mobile-slide-in-right {
+      opacity: 0;
   transform: translateX(50px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: opacity, transform;
-}
-
-.mobile-slide-in-right.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.mobile-scale-in {
-  opacity: 0;
+    }
+    
+    .mobile-slide-in-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .mobile-scale-in {
+      opacity: 0;
   transform: scale(0.8);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: opacity, transform;
-}
-
-.mobile-scale-in.visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
+    }
+    
+    .mobile-scale-in.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
 /* Stagger delays */
-.mobile-stagger-1 { transition-delay: 0.1s; }
-.mobile-stagger-2 { transition-delay: 0.2s; }
-.mobile-stagger-3 { transition-delay: 0.3s; }
-.mobile-stagger-4 { transition-delay: 0.4s; }
-.mobile-stagger-5 { transition-delay: 0.5s; }
-
+    .mobile-stagger-1 { transition-delay: 0.1s; }
+    .mobile-stagger-2 { transition-delay: 0.2s; }
+    .mobile-stagger-3 { transition-delay: 0.3s; }
+    .mobile-stagger-4 { transition-delay: 0.4s; }
+    .mobile-stagger-5 { transition-delay: 0.5s; }
+    
 /* Performance optimizations - GPU acceleration */
 .gpu-accelerated {
   transform: translate3d(0, 0, 0);
@@ -223,7 +223,7 @@
     transform: translate3d(0, 30px, 0);
   }
   to {
-    opacity: 1;
+        opacity: 1;
     transform: translate3d(0, 0, 0);
   }
 }
@@ -289,6 +289,42 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     contain: layout style paint;
+  }
+  
+  /* Mobile-specific performance boosts */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+  /* Optimize text rendering on mobile */
+    body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+  }
+  
+  /* Reduce motion on mobile for better performance */
+  .mobile-reduced-motion {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  /* Optimize images on mobile */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+  
+  /* Prevent layout shifts */
+  .no-layout-shift {
+    contain: layout style paint;
+    will-change: auto;
   }
 }
 

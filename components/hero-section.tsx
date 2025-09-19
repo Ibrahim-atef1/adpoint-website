@@ -191,32 +191,13 @@ export function HeroSection() {
               <Sparkles className="w-6 h-6" />
             </motion.div>
             <motion.div
-              className="absolute top-32 right-12 text-primary/20 md:hidden"
+              className="absolute top-32 right-12 text-primary/15 md:hidden"
               animate={reducedMotion ? {} : {
-                y: [5, -5, 5],
-                opacity: [0.2, 0.4, 0.2],
+                y: [3, -3, 3],
+                opacity: [0.1, 0.2, 0.1],
               }}
               transition={{
-                duration: 8,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-              style={{
-                willChange: 'transform, opacity',
-                transform: 'translate3d(0, 0, 0)',
-              }}
-            >
-              <Zap className="w-4 h-4" />
-            </motion.div>
-            <motion.div
-              className="absolute bottom-40 left-12 text-primary/20 md:hidden"
-              animate={reducedMotion ? {} : {
-                y: [-4, 4, -4],
-                opacity: [0.1, 0.3, 0.1],
-              }}
-              transition={{
-                duration: 10,
+                duration: 12,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
                 delay: 2,
@@ -226,7 +207,7 @@ export function HeroSection() {
                 transform: 'translate3d(0, 0, 0)',
               }}
             >
-              <Sparkles className="w-3 h-3" />
+              <Zap className="w-3 h-3" />
             </motion.div>
           </>
         )}

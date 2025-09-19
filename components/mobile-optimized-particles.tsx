@@ -27,20 +27,20 @@ export function MobileOptimizedParticles({ className = "" }: MobileOptimizedPart
   const createParticle = useCallback((): Particle => ({
     x: Math.random() * window.innerWidth,
     y: Math.random() * window.innerHeight,
-    vx: (Math.random() - 0.5) * 0.2, // Slower movement on mobile
-    vy: (Math.random() - 0.5) * 0.2,
-    size: Math.random() * 1 + 0.5, // Smaller particles
-    opacity: Math.random() * 0.2 + 0.05, // Lower opacity
-    baseSize: Math.random() * 1 + 0.5,
-    baseOpacity: Math.random() * 0.2 + 0.05,
+    vx: (Math.random() - 0.5) * 0.1, // Even slower movement for better performance
+    vy: (Math.random() - 0.5) * 0.1,
+    size: Math.random() * 0.8 + 0.3, // Even smaller particles
+    opacity: Math.random() * 0.15 + 0.03, // Even lower opacity
+    baseSize: Math.random() * 0.8 + 0.3,
+    baseOpacity: Math.random() * 0.15 + 0.03,
   }), [])
 
   const initParticles = useCallback(() => {
     const isMobile = window.innerWidth < 768
     isMobileRef.current = isMobile
     
-    // Reduce particle count on mobile
-    const particleCount = isMobile ? 6 : 12
+    // Further reduce particle count on mobile for better performance
+    const particleCount = isMobile ? 4 : 12
     particlesRef.current = Array.from({ length: particleCount }, createParticle)
   }, [createParticle])
 

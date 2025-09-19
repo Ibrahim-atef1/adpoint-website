@@ -80,14 +80,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         transition: { duration: 0.1 }
       } : {}}
       animate={isMobile && isInView && !reducedMotion ? {
-        scale: [1, 1.01, 1],
-        y: [0, -2, 0],
+        scale: [1, 1.005, 1],
+        y: [0, -1, 0],
       } : {}}
       transition={{
-        duration: isMobile ? 6 : 3,
+        duration: isMobile ? 8 : 3,
         repeat: Number.POSITIVE_INFINITY,
         ease: "easeInOut",
-        delay: Math.random() * 2,
+        delay: Math.random() * 3,
       }}
     >
       {/* Underglow effect - simplified for mobile */}
@@ -106,28 +106,28 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         }}
       />
 
-      {/* Mobile floating elements - simplified for performance */}
-      {isMobile && isInView && !reducedMotion && (
-        <motion.div
-          className="absolute top-4 right-4 text-primary/20"
-          animate={{
-            y: [-2, 2, -2],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-          style={{
-            willChange: 'transform, opacity',
-            transform: 'translate3d(0, 0, 0)',
-          }}
-        >
-          <Sparkles className="w-4 h-4" />
-        </motion.div>
-      )}
+       {/* Mobile floating elements - ultra-simplified for performance */}
+       {isMobile && isInView && !reducedMotion && animationQuality === 'high' && (
+         <motion.div
+           className="absolute top-4 right-4 text-primary/15"
+           animate={{
+             y: [-1, 1, -1],
+             opacity: [0.1, 0.2, 0.1],
+           }}
+           transition={{
+             duration: 10,
+             repeat: Number.POSITIVE_INFINITY,
+             ease: "easeInOut",
+             delay: 2,
+           }}
+           style={{
+             willChange: 'transform, opacity',
+             transform: 'translate3d(0, 0, 0)',
+           }}
+         >
+           <Sparkles className="w-3 h-3" />
+         </motion.div>
+       )}
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
         <motion.div 
