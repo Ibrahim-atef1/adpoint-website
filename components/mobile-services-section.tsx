@@ -79,15 +79,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         scale: 0.98,
         transition: { duration: 0.1 }
       } : {}}
-      animate={isMobile && isInView && !reducedMotion ? {
-        scale: [1, 1.005, 1],
-        y: [0, -1, 0],
-      } : {}}
+      animate={{}}
       transition={{
-        duration: isMobile ? 8 : 3,
-        repeat: isMobile && isInView && !reducedMotion ? Number.POSITIVE_INFINITY : 0,
-        ease: "easeInOut",
-        delay: isMobile && isInView && !reducedMotion ? Math.random() * 3 : 0,
+        duration: 0.3,
+        ease: "easeOut"
       }}
     >
       {/* Underglow effect - enhanced for mobile */}
@@ -124,19 +119,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         />
       )}
 
-       {/* Mobile floating elements - ultra-simplified for performance */}
-       {isMobile && isInView && !reducedMotion && (
+       {/* Mobile floating elements - disabled for performance */}
+       {false && isMobile && isInView && !reducedMotion && (
          <motion.div
            className="absolute top-4 right-4 text-primary/15"
-           animate={{
-             y: [-1, 1, -1],
-             opacity: [0.1, 0.2, 0.1],
-           }}
+           animate={{}}
            transition={{
-             duration: 10,
-             repeat: Number.POSITIVE_INFINITY,
-             ease: "easeInOut",
-             delay: 2,
+             duration: 0.3,
+             ease: "easeOut"
            }}
            style={{
              willChange: 'transform, opacity',
@@ -157,20 +147,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
               `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
             transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}
-          animate={isMobile && isInView ? {
-            scale: [1, 1.05, 1],
-            rotate: [0, 2, 0],
-            boxShadow: [
-              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)`,
-              `0 0 40px ${color}80, inset 0 1px 0 rgba(255,255,255,0.4)`,
-              `0 0 30px ${color}60, inset 0 1px 0 rgba(255,255,255,0.3)`
-            ],
-          } : {}}
+          animate={{}}
           transition={{
-            duration: 2.5,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 0.3,
+            duration: 0.3,
+            ease: "easeOut"
           }}
         >
           {/* Animated background ring */}
@@ -211,14 +191,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         
         <motion.h3 
           className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4"
-          animate={isMobile && isInView ? {
-            scale: [1, 1.02, 1],
-          } : {}}
+          animate={{}}
           transition={{
-            duration: 2,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 0.5,
+            duration: 0.3,
+            ease: "easeOut"
           }}
         >
           {title}
@@ -358,9 +334,9 @@ export function MobileServicesSection() {
 
   return (
     <section ref={sectionRef} className="relative w-full min-h-screen bg-black">
-      {/* Mobile floating background elements */}
+      {/* Mobile floating background elements - disabled for performance */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
+        {false && [...Array(6)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-primary/20 rounded-full md:hidden"
@@ -368,17 +344,10 @@ export function MobileServicesSection() {
               left: `${10 + i * 15}%`,
               top: `${20 + (i % 3) * 25}%`,
             }}
-            animate={{
-              y: [-20, 20, -20],
-              x: [-10, 10, -10],
-              opacity: [0.1, 0.4, 0.1],
-              scale: [0.5, 1.5, 0.5],
-            }}
+            animate={{}}
             transition={{
-              duration: 8 + i * 0.5,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: i * 0.8,
+              duration: 0.3,
+              ease: "easeOut"
             }}
           />
         ))}
@@ -388,13 +357,10 @@ export function MobileServicesSection() {
       <div className="absolute top-8 left-0 right-0 z-20 px-4">
         <motion.h2 
           className="text-3xl sm:text-4xl font-bold text-white text-center font-display"
-          animate={{
-            scale: [1, 1.02, 1],
-          }}
+          animate={{}}
           transition={{
-            duration: 4,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
+            duration: 0.3,
+            ease: "easeOut"
           }}
         >
           Our Services

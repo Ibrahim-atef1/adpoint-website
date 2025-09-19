@@ -15,32 +15,49 @@ export function WorkingCinematicFooter() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!footerRef.current) return
-
-      const rect = footerRef.current.getBoundingClientRect()
       const windowHeight = window.innerHeight
       const isMobile = window.innerWidth < 768
       
-      // Check if we've reached the end of the page
-      const distanceFromBottom = rect.top - windowHeight
-      const isAtEnd = distanceFromBottom <= 0
-      
-      // More lenient trigger for mobile devices
-      const isAtVeryEnd = isMobile ? distanceFromBottom <= 100 : distanceFromBottom <= 0
-      
-      if (isAtVeryEnd && !isFormOpen && !isNavigating) {
-        // Start the footer animation
-        setIsVisible(true)
+      if (isMobile) {
+        // For mobile, use a simpler approach based on scroll position
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        const documentHeight = document.documentElement.scrollHeight
+        const scrollPercentage = (scrollTop + windowHeight) / documentHeight
         
-        // Calculate scroll progress for full screen coverage
-        const scrollPastEnd = Math.abs(distanceFromBottom)
-        const maxScroll = isMobile ? windowHeight * 0.8 : windowHeight * 1.2
-        const progress = Math.min(scrollPastEnd / maxScroll, 1)
-        setScrollProgress(progress)
+        // Trigger when scrolled to 95% of the page (later)
+        const isAtVeryEnd = scrollPercentage >= 0.95
+        
+        if (isAtVeryEnd && !isFormOpen && !isNavigating) {
+          setIsVisible(true)
+          setScrollProgress(Math.min((scrollPercentage - 0.9) * 10, 1))
+          
+          console.log('Mobile footer triggered:', { 
+            scrollPercentage, 
+            isAtVeryEnd, 
+            isVisible: true
+          })
+        } else {
+          setIsVisible(false)
+          setScrollProgress(0)
+        }
       } else {
-        // Reset when not at the end or form is open
-        setIsVisible(false)
-        setScrollProgress(0)
+        // Desktop logic
+        if (!footerRef.current) return
+
+        const rect = footerRef.current.getBoundingClientRect()
+        const distanceFromBottom = rect.top - windowHeight
+        const isAtVeryEnd = distanceFromBottom <= 0
+        
+        if (isAtVeryEnd && !isFormOpen && !isNavigating) {
+          setIsVisible(true)
+          const scrollPastEnd = Math.abs(distanceFromBottom)
+          const maxScroll = windowHeight * 1.2
+          const progress = Math.min(scrollPastEnd / maxScroll, 1)
+          setScrollProgress(progress)
+        } else {
+          setIsVisible(false)
+          setScrollProgress(0)
+        }
       }
     }
 
@@ -100,26 +117,36 @@ export function WorkingCinematicFooter() {
       </footer>
 
 
+      {/* Debug Info */}
+      <div className="fixed top-4 left-4 bg-red-600 text-white p-2 text-xs z-50 rounded">
+        isVisible: {isVisible.toString()}, scrollProgress: {scrollProgress.toFixed(2)}
+      </div>
+
       {/* Full Screen Footer Overlay */}
       {isVisible && (
         <motion.div
           className="fixed inset-0 z-50"
           initial={{ opacity: 0 }}
           animate={{ 
-            opacity: scrollProgress > 0.05 ? 1 : 0
+            opacity: isVisible ? 1 : 0
           }}
           transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
           style={{ 
             background: '#131741'
           }}
         >
+          {/* Test Content - Always Visible */}
+          <div className="fixed top-20 left-4 bg-yellow-600 text-white p-2 text-xs z-50 rounded">
+            FOOTER OVERLAY IS RENDERED!
+          </div>
+
           {/* Content Container */}
           <motion.div 
-            className="h-full flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 md:p-8 lg:p-16 space-y-8 sm:space-y-12 lg:space-y-0 lg:space-x-20 xl:space-x-32"
+            className="h-full w-full flex flex-col lg:flex-row items-center justify-center p-4 sm:p-6 md:p-8 lg:p-16 space-y-8 sm:space-y-10 lg:space-y-0 lg:space-x-20 xl:space-x-32 overflow-y-auto"
             initial={{ opacity: 0, y: 30 }}
             animate={{ 
-              opacity: scrollProgress > 0.05 ? 1 : 0,
-              y: scrollProgress > 0.05 ? 0 : 20
+              opacity: 1,
+              y: 0
             }}
             transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
@@ -128,20 +155,23 @@ export function WorkingCinematicFooter() {
               className="w-full lg:w-1/2 lg:flex-1 flex flex-col items-center lg:items-start text-center lg:text-left"
               initial={{ x: -50, opacity: 0 }}
               animate={{ 
-                x: scrollProgress > 0.1 ? 0 : -20,
-                opacity: scrollProgress > 0.1 ? 1 : 0
+                x: 0,
+                opacity: 1
               }}
               transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <div className="max-w-lg lg:max-w-xl">
+              <div className="max-w-lg lg:max-w-xl w-full">
+                {/* Test Text */}
+                <div className="text-white text-2xl font-bold mb-4">TEST LOGO SECTION</div>
+                
                 <Image
                   src="/logo/Transparent Logo.png"
                   alt="AdPoint Logo"
                   width={600}
                   height={240}
-                  className="h-24 sm:h-32 lg:h-48 xl:h-56 w-auto mx-auto lg:mx-0 mb-4 sm:mb-6 lg:mb-8"
+                  className="h-20 sm:h-24 lg:h-48 xl:h-56 w-auto mx-auto lg:mx-0 mb-4 sm:mb-6 lg:mb-8"
                 />
-                <h2 className="text-xl sm:text-2xl lg:text-4xl xl:text-5xl font-bold text-red-100 mb-3 sm:mb-4 lg:mb-6 leading-tight">
+                <h2 className="text-lg sm:text-xl lg:text-4xl xl:text-5xl font-bold text-red-100 mb-3 sm:mb-4 lg:mb-6 leading-tight">
                   Let's Create Something Amazing
                 </h2>
                 <p className="text-red-200 text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed">
@@ -155,14 +185,17 @@ export function WorkingCinematicFooter() {
               className="w-full lg:w-1/2 lg:flex-1 flex flex-col items-center lg:items-end"
               initial={{ x: 50, opacity: 0 }}
               animate={{ 
-                x: scrollProgress > 0.15 ? 0 : 20,
-                opacity: scrollProgress > 0.15 ? 1 : 0
+                x: 0,
+                opacity: 1
               }}
               transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <div className="w-full lg:w-auto space-y-6 sm:space-y-8 mt-8 sm:mt-12 lg:mt-48">
+              <div className="w-full lg:w-auto space-y-4 sm:space-y-6 lg:space-y-8 mt-4 sm:mt-6 lg:mt-48">
+                {/* Test Text */}
+                <div className="text-white text-2xl font-bold mb-4">TEST NAVIGATION SECTION</div>
+                
                 {/* Navigation Menu Buttons */}
-                <div className="w-full lg:w-auto space-y-4 sm:space-y-6">
+                <div className="w-full lg:w-auto space-y-2 sm:space-y-3 lg:space-y-4">
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ 
@@ -173,7 +206,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("about")}
-                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[48px] px-4 py-3 flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto rounded-lg hover:bg-white/5"
                     >
                       About Us
                     </button>
@@ -189,7 +222,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("services")}
-                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[48px] px-4 py-3 flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto rounded-lg hover:bg-white/5"
                     >
                       Services
                     </button>
@@ -205,7 +238,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("portfolio")}
-                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[48px] px-4 py-3 flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto rounded-lg hover:bg-white/5"
                     >
                       Portfolio
                     </button>
@@ -221,7 +254,7 @@ export function WorkingCinematicFooter() {
                   >
                     <button 
                       onClick={() => scrollToSection("contact")}
-                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[44px] flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto"
+                      className="text-white hover:text-red-200 text-base sm:text-lg lg:text-xl font-medium transition-all duration-300 min-h-[48px] px-4 py-3 flex items-center justify-center lg:justify-end hover:scale-105 w-full lg:w-auto rounded-lg hover:bg-white/5"
                     >
                       Work With Us
                     </button>
@@ -229,9 +262,9 @@ export function WorkingCinematicFooter() {
                   
                 </div>
 
-                {/* Contact Info */}
+                {/* Instagram Contact */}
                 <motion.div 
-                  className="w-full pt-6 sm:pt-8 lg:pt-12 border-t border-red-300/20"
+                  className="w-full pt-4 sm:pt-6 lg:pt-8 border-t border-gray-600/30"
                   initial={{ opacity: 0, y: 25 }}
                   animate={{ 
                     opacity: 1,
@@ -239,44 +272,16 @@ export function WorkingCinematicFooter() {
                   }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                  <div className="space-y-4 lg:space-y-6">
-                    <div className="flex items-center space-x-4">
-                      <a 
-                        href="https://www.instagram.com/adpoint.eg/" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200"
-                      >
-                        <Instagram className="w-6 h-6 text-red-400" />
-                        <span className="text-red-200 text-base lg:text-lg">@adpoint.eg</span>
-                      </a>
-                    </div>
-                    
-                    <motion.div 
-                      className="flex items-center space-x-4"
-                      initial={{ opacity: 0, x: 15 }}
-                      animate={{ 
-                        opacity: scrollProgress > 0.24 ? 1 : 0,
-                        x: scrollProgress > 0.24 ? 0 : 8
-                      }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
+                  <div className="flex items-center justify-center lg:justify-end pt-4 sm:pt-6">
+                    <a 
+                      href="https://www.instagram.com/adpoint.eg/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200 min-h-[48px] px-4 py-2 rounded-lg hover:bg-white/5"
                     >
-                      <div className="w-3 h-3 bg-red-300 rounded-full"></div>
-                      <span className="text-red-200 text-base lg:text-lg">+1 (555) 123-4567</span>
-                    </motion.div>
-                    
-                    <motion.div 
-                      className="flex items-center space-x-4"
-                      initial={{ opacity: 0, x: 15 }}
-                      animate={{ 
-                        opacity: scrollProgress > 0.26 ? 1 : 0,
-                        x: scrollProgress > 0.26 ? 0 : 8
-                      }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                    >
-                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                      <span className="text-red-200 text-base lg:text-lg">@adpointstudio</span>
-                    </motion.div>
+                      <Instagram className="w-6 h-6 text-red-400" />
+                      <span className="text-red-200 text-base lg:text-lg">@adpoint.eg</span>
+                    </a>
                   </div>
                 </motion.div>
 
@@ -288,8 +293,8 @@ export function WorkingCinematicFooter() {
               className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ 
-                opacity: scrollProgress > 0.3 ? 1 : 0,
-                y: scrollProgress > 0.3 ? 0 : 15
+                opacity: 1,
+                y: 0
               }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
@@ -300,7 +305,7 @@ export function WorkingCinematicFooter() {
 
             {/* Small Back to Top Button - Bottom Left */}
             <motion.div
-              className="absolute bottom-6 left-6 flex flex-col items-center z-10"
+              className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 flex flex-col items-center z-10"
               initial={{ opacity: 0, scale: 0.5, y: 20 }}
               animate={{ 
                 opacity: 1,
@@ -311,7 +316,7 @@ export function WorkingCinematicFooter() {
             >
               <motion.button
                 onClick={goToTop}
-                className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 shadow-2xl hover:shadow-red-500/25 transition-all duration-300 group"
+                className="bg-red-600 hover:bg-red-700 text-white rounded-full p-4 shadow-2xl hover:shadow-red-500/25 transition-all duration-300 group min-h-[48px] min-w-[48px] flex items-center justify-center"
                 whileHover={{ 
                   scale: 1.15,
                   y: -2
