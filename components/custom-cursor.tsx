@@ -89,8 +89,8 @@ export default function CustomCursor() {
     const handleMouseEnter = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       
-      // Only apply hover effects for buttons
-      if (target.matches('button, [role="button"]')) {
+      // Only apply hover effects for buttons - check if target is valid and has matches method
+      if (target && typeof target.matches === 'function' && target.matches('button, [role="button"]')) {
         gsap.to(cursor, { 
           scale: 1.5, 
           duration: 0.3, 
@@ -107,8 +107,8 @@ export default function CustomCursor() {
     const handleMouseLeave = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       
-      // Only remove hover effects when leaving buttons
-      if (target.matches('button, [role="button"]')) {
+      // Only remove hover effects when leaving buttons - check if target is valid and has matches method
+      if (target && typeof target.matches === 'function' && target.matches('button, [role="button"]')) {
         gsap.to(cursor, { 
           scale: 1, 
           duration: 0.3,

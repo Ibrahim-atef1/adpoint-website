@@ -12,6 +12,7 @@
     "@emailjs/browser": "^4.4.1",
     "@radix-ui/react-label": "2.1.1",
     "@radix-ui/react-slot": "1.1.1",
+    "@types/three": "^0.180.0",
     "@vercel/analytics": "latest",
     "@vercel/speed-insights": "^1.2.0",
     "autoprefixer": "^10.4.20",
@@ -25,7 +26,8 @@
     "react-dom": "^18",
     "react-hook-form": "^7.60.0",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.13",

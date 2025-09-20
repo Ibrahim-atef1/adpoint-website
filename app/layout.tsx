@@ -5,7 +5,9 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { LoadingOverlay } from "@/components/loading-overlay"
 import { FloatingCTA } from "@/components/floating-cta"
+import CustomCursor from "@/components/custom-cursor"
 import { FormProvider } from "@/contexts/FormContext"
+import { PreloadCriticalResources, PerformanceMonitor } from "@/components/performance-optimizations"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -27,7 +29,53 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "AdPoint — Creative Marketing Agency",
   description: "Premium digital marketing agency specializing in creative campaigns, branding, and web development.",
-  generator: "v0.app",
+  generator: "Next.js",
+  keywords: ["digital marketing", "creative agency", "branding", "web development", "marketing campaigns"],
+  authors: [{ name: "AdPoint" }],
+  creator: "AdPoint",
+  publisher: "AdPoint",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://adpoint.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "AdPoint — Creative Marketing Agency",
+    description: "Premium digital marketing agency specializing in creative campaigns, branding, and web development.",
+    url: 'https://adpoint.com',
+    siteName: 'AdPoint',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'AdPoint Creative Marketing Agency',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "AdPoint — Creative Marketing Agency",
+    description: "Premium digital marketing agency specializing in creative campaigns, branding, and web development.",
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export const viewport: Viewport = {
@@ -79,6 +127,9 @@ export default function RootLayout({
         </div>
 
         <FormProvider>
+          <PreloadCriticalResources />
+          <PerformanceMonitor />
+          <CustomCursor />
           <div className="relative z-10">
             <LoadingOverlay />
             <Suspense fallback={null}>{children}</Suspense>

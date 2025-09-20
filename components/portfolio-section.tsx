@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, memo, useCallback } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { motion } from "framer-motion"
@@ -22,9 +22,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ client }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isInView, setIsInView] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    setIsClient(true)
     // Check if mobile
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -54,13 +56,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ client }) => {
   }, [])
 
   // On mobile, show description when in view. On desktop, show on hover
-  const shouldShowDescription = isMobile ? isInView : isHovered
+  const shouldShowDescription = isClient && isMobile ? isInView : isHovered
 
   return (
     <Link href={`/portfolio/${client.slug}`}>
     <motion.div 
       ref={cardRef}
-      className="relative w-[400px] h-[400px] md:w-[500px] md:h-[500px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
+      className="relative w-full md:w-[500px] h-[400px] sm:h-[500px] lg:h-[600px] bg-black rounded-2xl overflow-hidden flex-shrink-0 border border-gray-800 transition-all duration-1000 group cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{
@@ -89,30 +91,32 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ client }) => {
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
         {/* Logo or Initial */}
         <motion.div 
-          className={`w-[192px] h-[192px] sm:w-[216px] sm:h-[216px] flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative ${isHovered ? 'scale-110' : 'scale-100'}`}
+          className={`w-26 h-26 sm:w-32 sm:h-32 md:w-36 md:h-36 flex items-center justify-center mb-4 sm:mb-6 transition-all duration-1000 relative p-2 bg-white/5 rounded-full ${shouldShowDescription ? 'scale-110' : 'scale-100'}`}
           style={{
-            transform: isHovered ? 'scale(1.1)' : 'scale(1)'
+            transform: shouldShowDescription ? 'scale(1.1)' : 'scale(1)'
           }}
         >
           {client.logo ? (
-            <div className="relative z-10 w-[180px] h-[180px] sm:w-[216px] sm:h-[216px]">
+            <div className="relative z-10 w-full h-full">
               <Image
                 src={client.logo}
                 alt={`${client.name} logo`}
                 fill
                 className={`object-contain ${
-                  isHovered ? 'opacity-100 brightness-100' : 'opacity-50 brightness-[56.25]'
+                  client.name === 'Zenachii' 
+                    ? 'brightness-0 invert' // Make zenachii logo white
+                    : shouldShowDescription ? 'opacity-100 brightness-100' : 'opacity-50 brightness-[56.25]'
                 }`}
               />
             </div>
           ) : (
             <span 
-              className={`text-4xl sm:text-5xl font-bold text-white relative z-10 ${
-                isHovered ? 'opacity-100 brightness-100' : 'opacity-50 brightness-[56.25]'
+              className={`text-7xl sm:text-8xl md:text-9xl font-bold text-white relative z-10 ${
+                shouldShowDescription ? 'opacity-100 brightness-100' : 'opacity-50 brightness-[56.25]'
               }`}
               style={{
-                transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-                filter: isHovered ? 'drop-shadow(0 0 8px currentColor)' : 'none'
+                transform: shouldShowDescription ? 'scale(1.1)' : 'scale(1)',
+                filter: shouldShowDescription ? 'drop-shadow(0 0 8px currentColor)' : 'none'
               }}
             >
               {client.name.charAt(0)}
@@ -277,7 +281,7 @@ export function PortfolioSection() {
 
         {/* Mobile: Vertical stack */}
         <div className="md:hidden w-full px-4">
-          <div className="flex flex-col items-center gap-6">
+          <div className="grid grid-cols-1 gap-6 max-w-sm mx-auto">
             {clients.map((client, i) => (
               <ProjectCard key={i} client={client} />
             ))}

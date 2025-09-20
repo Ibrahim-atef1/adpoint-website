@@ -1,11 +1,19 @@
 "use client"
 
-import React, { useState } from "react"
-import { motion } from "framer-motion"
+import React, { useState, useEffect, useRef, Suspense, useCallback } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, X } from "lucide-react"
+import { ArrowLeft, X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react"
 import { type ClientData } from "@/lib/client-data"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { WorkingCinematicFooter } from "@/components/working-cinematic-footer"
+
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 interface ClientPageClientProps {
   client: ClientData
@@ -179,60 +187,292 @@ function getVideoTags(client: ClientData, index: number): string[] {
 
 export default function ClientPageClient({ client }: ClientPageClientProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  
+  const containerRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const galleryRef = useRef<HTMLDivElement>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
+  
+  const { scrollYProgress } = useScroll()
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
+  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.1])
+
+  useEffect(() => {
+    setMounted(true)
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || !containerRef.current) return
+
+    const ctx = gsap.context(() => {
+      // Hero section animations
+      gsap.fromTo(heroRef.current, 
+        { opacity: 0, y: 100 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 1.2, 
+          ease: [0.25, 0.46, 0.45, 0.94],
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            toggleActions: "play none none reverse"
+          }
+        }
+      )
+
+      // Gallery items stagger animation
+      gsap.fromTo(".gallery-item", 
+        { opacity: 0, y: 60, scale: 0.9 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          scale: 1,
+          duration: 0.8, 
+          stagger: 0.1,
+          ease: [0.25, 0.46, 0.45, 0.94],
+          scrollTrigger: {
+            trigger: galleryRef.current,
+            start: "top 80%",
+            end: "bottom 20%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      )
+
+      // Parallax effect for images
+      gsap.utils.toArray(".parallax-image").forEach((image: any) => {
+        gsap.to(image, {
+          yPercent: -50,
+          ease: "none",
+          scrollTrigger: {
+            trigger: image,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        })
+      })
+
+      // Text reveal animations
+      gsap.fromTo(".reveal-text", 
+        { opacity: 0, y: 30 },
+        { 
+          opacity: 1, 
+          y: 0,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: [0.25, 0.46, 0.45, 0.94],
+          scrollTrigger: {
+            trigger: ".reveal-text",
+            start: "top 85%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      )
+
+    }, containerRef)
+
+    return () => ctx.revert()
+  }, [mounted])
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % client.images.length)
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + client.images.length) % client.images.length)
+  }
+
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="animate-pulse text-xl">Loading...</div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-[#131129] text-white">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-[#131129]/95 backdrop-blur-sm border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link 
-            href="/#portfolio" 
-            className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Portfolio
-          </Link>
-          <h1 className="text-xl font-bold">{client.name}</h1>
-        </div>
+    <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden">
+      {/* Progress Bar */}
+      <div ref={progressRef} className="fixed top-0 left-0 w-full h-1 bg-gray-800 z-[60]">
+        <motion.div 
+          className="h-full bg-gradient-to-r from-red-500 to-red-600"
+          style={{ 
+            scaleX: scrollYProgress,
+            transformOrigin: "left"
+          }}
+        />
       </div>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
+      {/* Enhanced Header */}
+      <motion.div 
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/10"
+      >
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            {/* Back button */}
+          <Link 
+            href="/#portfolio" 
+              className="group flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white transition-all duration-300 flex-shrink-0"
+            >
+              <motion.div
+                whileHover={{ x: -3 }}
+                transition={{ duration: 0.2 }}
+                className="sm:hidden"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </motion.div>
+              <motion.div
+                whileHover={{ x: -5 }}
+                transition={{ duration: 0.2 }}
+                className="hidden sm:block"
+          >
+            <ArrowLeft className="w-5 h-5" />
+              </motion.div>
+              <span className="text-xs sm:text-sm font-medium">
+                <span className="sm:hidden">Back</span>
+                <span className="hidden sm:inline">Back to Portfolio</span>
+              </span>
+            </Link>
+            
+            {/* Client name - centered with proper spacing */}
+            <motion.h1 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent text-center flex-1 mx-2 sm:mx-4 truncate"
+            >
+              {client.name}
+            </motion.h1>
+
+            {/* Gallery link */}
+            <Link
+              href="#gallery"
+              className="text-xs sm:text-sm text-gray-300 hover:text-white transition-colors flex-shrink-0 flex items-center"
+            >
+              <span className="sm:hidden">Gallery</span>
+              <span className="hidden sm:inline">View Gallery</span>
+          </Link>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Enhanced Hero Section */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background with parallax */}
         {client.heroImage && (
           <div className="absolute inset-0">
+            <motion.div
+              style={{ scale: heroScale, opacity: heroOpacity }}
+              className="w-full h-full"
+            >
             <Image
               src={client.heroImage}
               alt={client.name}
               fill
-              className="object-cover"
+                className="object-cover parallax-image"
               priority
             />
-            <div className="absolute inset-0 bg-black/50" />
+            </motion.div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(185,28,28,0.1),transparent_70%)]" />
           </div>
         )}
         
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="flex flex-col items-center gap-6"
+            transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="flex flex-col items-center gap-8"
           >
             {client.logo && (
-              <div className="w-24 h-24 relative">
+              <motion.div 
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ duration: 1.2, ease: [0.68, -0.55, 0.265, 1.55] }}
+                className="w-32 h-32 md:w-40 md:h-40 relative"
+              >
                 <Image
                   src={client.logo}
                   alt={`${client.name} logo`}
                   fill
                   className="object-contain"
                 />
-              </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-600/20 rounded-full blur-xl" />
+              </motion.div>
             )}
-            <h1 className="text-4xl md:text-6xl font-bold font-display">
+            
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="text-5xl md:text-7xl lg:text-8xl font-bold font-display bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent"
+            >
               {client.name}
-            </h1>
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed"
+            >
+              {client.description}
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+              className="flex flex-wrap gap-3 justify-center"
+            >
+              {getImageTags(client, 0).slice(0, 3).map((tag, index) => (
+                <span
+                  key={tag}
+                  className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium border border-white/20"
+                >
+                  {tag}
+                </span>
+              ))}
+            </motion.div>
           </motion.div>
         </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 0.8 }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        >
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
+          >
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-1 h-3 bg-white/60 rounded-full mt-2"
+            />
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Project Overview */}
@@ -347,27 +587,32 @@ export default function ClientPageClient({ client }: ClientPageClientProps) {
         </div>
       </section>
 
-      {/* Project Details */}
+      {/* Enhanced Project Details */}
       {client.images.length > 0 && (
-        <section className="py-16 px-4">
+        <section className="py-20 px-4 bg-black">
           <div className="max-w-7xl mx-auto">
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
               viewport={{ once: true }}
-              className="text-3xl font-bold text-center mb-16 text-[#C24533]"
+              className="text-center mb-20"
             >
-              Project Details
-            </motion.h2>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                Creative Process
+              </h2>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Behind the scenes of our design and development approach
+              </p>
+            </motion.div>
             
-            <div className="space-y-20">
+            <div className="space-y-32">
               {client.images.map((image, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  transition={{ duration: 0.8, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${
                     index % 2 === 1 ? 'lg:grid-flow-col-dense' : ''
@@ -476,31 +721,197 @@ export default function ClientPageClient({ client }: ClientPageClientProps) {
         </section>
       )}
 
-      {/* Lightbox */}
+      {/* Enhanced Gallery Section */}
+      {client.images.length > 0 && (
+        <section id="gallery" ref={galleryRef} className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+              viewport={{ once: true }}
+              className="text-center mb-20"
+            >
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                Project Gallery
+              </h2>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                Explore the creative process and final deliverables
+              </p>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {client.images.map((image, index) => (
+                <motion.div
+                  key={index}
+                  className="gallery-item group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+                  whileHover={{ scale: 1.02, y: -5 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <div className="aspect-square relative">
+                    <Image
+                      src={image}
+                      alt={`${client.name} project image ${index + 1}`}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <h3 className="text-white font-semibold text-sm mb-1">
+                        {getImageTitle(client, index)}
+                      </h3>
+                      <p className="text-gray-300 text-xs">
+                        {getImageDescription(client, index)}
+                      </p>
+                    </div>
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                        <ExternalLink className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Video Gallery */}
+            {client.videos.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="mt-20"
+              >
+                <h3 className="text-2xl font-bold text-center mb-12 text-white">Video Content</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {client.videos.map((video, index) => (
+                    <motion.div
+                      key={index}
+                      className="gallery-item group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="aspect-video relative">
+                        <video
+                          src={video}
+                          controls
+                          className="w-full h-full object-cover"
+                          poster={client.images[0]}
+                        />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Enhanced Lightbox */}
       {selectedImage && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
           onClick={() => setSelectedImage(null)}
         >
-          <div className="relative max-w-5xl max-h-[90vh] w-full h-full">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0, y: 50 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 50 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="relative max-w-6xl max-h-[90vh] w-full h-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Navigation for multiple images */}
+            {client.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    prevImage()
+                    setSelectedImage(client.images[currentImageIndex])
+                  }}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 backdrop-blur-sm rounded-full text-white hover:bg-black/70 transition-all duration-300"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    nextImage()
+                    setSelectedImage(client.images[currentImageIndex])
+                  }}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 backdrop-blur-sm rounded-full text-white hover:bg-black/70 transition-all duration-300"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+
+            {/* Close button */}
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 z-10 bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
+              className="absolute top-4 right-4 z-10 p-3 bg-black/50 backdrop-blur-sm rounded-full text-white hover:bg-black/70 transition-all duration-300"
             >
               <X className="w-6 h-6" />
             </button>
+
+            {/* Image counter */}
+            {client.images.length > 1 && (
+              <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-sm">
+                {currentImageIndex + 1} / {client.images.length}
+              </div>
+            )}
+
+            {/* Image */}
+            <div className="w-full h-full flex items-center justify-center">
             <Image
               src={selectedImage}
               alt="Gallery image"
               fill
               className="object-contain"
+                priority
             />
           </div>
+
+            {/* Image info */}
+            <div className="absolute bottom-4 left-4 right-4 z-10 bg-black/50 backdrop-blur-sm rounded-lg p-4">
+              <h3 className="text-white font-semibold text-lg mb-1">
+                {getImageTitle(client, currentImageIndex)}
+              </h3>
+              <p className="text-gray-300 text-sm">
+                {getImageDescription(client, currentImageIndex)}
+              </p>
+            </div>
+          </motion.div>
         </motion.div>
       )}
+
+      {/* Mobile-specific enhancements */}
+      {isMobile && (
+        <div className="fixed bottom-4 right-4 z-30">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg"
+          >
+            <ChevronLeft className="w-6 h-6 rotate-90" />
+          </motion.button>
+        </div>
+        )}
+
+        {/* Small empty space to give visual cue for footer */}
+        <div className="h-16 bg-black" />
+        
+        {/* Cinematic Footer Animation */}
+        <WorkingCinematicFooter />
     </div>
   )
 }

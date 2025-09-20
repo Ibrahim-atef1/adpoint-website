@@ -15,19 +15,9 @@ const nextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60,
   },
   compress: true,
   poweredByHeader: false,
-  generateEtags: false,
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.mjs$/,
-      include: /node_modules/,
-      type: "javascript/auto",
-    });
-    return config;
-  },
 }
 
 export default nextConfig
