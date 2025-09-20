@@ -69,16 +69,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         willChange: 'transform, box-shadow',
         transform: 'translate3d(0, 0, 0)'
       }}
-      animate={isMobile && isInView ? {
-        scale: [1, 1.02, 1],
-        y: [0, -5, 0],
-      } : {}}
-      transition={{
-        duration: 3,
-        repeat: Number.POSITIVE_INFINITY,
-        ease: "easeInOut",
-        delay: Math.random() * 2,
-      }}
+      // Mobile latching animations removed
     >
       {/* Underglow effect */}
       <div 
@@ -90,43 +81,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
         }}
       />
 
-      {/* Mobile floating elements */}
-      {isMobile && isInView && (
-        <>
-          <motion.div
-            className="absolute top-4 right-4 text-primary/30"
-            animate={{
-              y: [-3, 3, -3],
-              rotate: [0, 5, 0],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: 0.5,
-            }}
-          >
-            <Sparkles className="w-3 h-3" />
-          </motion.div>
-          <motion.div
-            className="absolute bottom-4 left-4 text-primary/30"
-            animate={{
-              y: [3, -3, 3],
-              rotate: [0, -3, 0],
-              opacity: [0.2, 0.5, 0.2],
-            }}
-            transition={{
-              duration: 2.5,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: 1,
-            }}
-          >
-            <Zap className="w-2 h-2" />
-          </motion.div>
-        </>
-      )}
+      {/* Mobile floating elements removed */}
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 lg:p-8 text-center">
         <motion.div 
@@ -136,16 +91,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
             boxShadow: `0 0 25px ${color}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
             transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}
-          animate={isMobile && isInView ? {
-            scale: [1, 1.05, 1],
-            rotate: [0, 2, 0],
-          } : {}}
-          transition={{
-            duration: 2.5,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 0.3,
-          }}
+          // Mobile latching animations removed
         >
           {/* Animated background ring */}
           <div 
@@ -183,20 +129,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ title, icon, color, descripti
           </div>
         </motion.div>
         
-        <motion.h3 
+        <h3 
           className="text-xl sm:text-2xl font-bold text-white font-display mb-3 sm:mb-4"
-          animate={isMobile && isInView ? {
-            scale: [1, 1.02, 1],
-          } : {}}
-          transition={{
-            duration: 2,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 0.5,
-          }}
         >
           {title}
-        </motion.h3>
+        </h3>
 
         {/* Hover Description */}
         <div className={`transition-all duration-1000 ${shouldShowDescription ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
